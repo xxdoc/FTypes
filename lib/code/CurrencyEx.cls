@@ -6,7 +6,7 @@ BEGIN
   DataSourceBehavior  = 0  'vbNone
   MTSTransactionMode  = 0  'NotAnMTSObject
 END
-Attribute VB_Name = "DoubleEx"
+Attribute VB_Name = "CurrencyEx"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
@@ -15,23 +15,11 @@ Option Explicit
 
 'VARIABLES
 
-Private p_Value As Double
+Private p_Value As Currency
 
 'PROPERTIES
 
-Public Property Get Max() As Double
-    
-    Max = D_MX
-
-End Property
-
-Public Property Get Min() As Double
-    
-    Min = D_MN
-
-End Property
-
-Public Property Get Value() As Double
+Public Property Get Value() As Currency
 Attribute Value.VB_UserMemId = 0
 Attribute Value.VB_MemberFlags = "200"
     
@@ -39,7 +27,7 @@ Attribute Value.VB_MemberFlags = "200"
 
 End Property
 
-Public Property Let Value(ByVal NewValue As Double)
+Public Property Let Value(ByVal NewValue As Currency)
     
     p_Value = NewValue
 
@@ -47,41 +35,29 @@ End Property
 
 'ROUTINES
 
-Public Function Clone() As DoubleEx
+Public Function Clone() As CurrencyEx
     
-    Set Clone = New DoubleEx
+    Set Clone = New CurrencyEx
     
     Clone.Value = p_Value
 
 End Function
 
-Public Function Parse(ByRef Value As Variant) As DoubleEx
+Public Function Parse(ByRef Value As Variant) As CurrencyEx
     
     Set Parse = Me
     
     Select Case VarType(Value)
         
-        Case vbInteger To vbDouble, vbDate, vbBoolean, vbByte
+        Case vbBoolean, vbByte, vbCurrency, vbDate, vbInteger, vbLong
             
             p_Value = Value
         
-        Case vbString
-            
-            p_Value = ToNumber(Value)
+        Case vbDecimal, vbDouble, vbSingle, vbString
         
-        Case vbCurrency, vbDecimal
+        Case Else
             
-            If Value > D_MN Then
-                
-                If Value < D_MX Then p_Value = Value Else p_Value = D_MX
-            
-            Else
-                p_Value = D_MN
-            End If
-         
-         Case Else
-            
-            p_Value = 0#
+            p_Value = 0@
     
     End Select
 
@@ -97,11 +73,19 @@ Public Function ToByte() As ByteEx
     
     Set ToByte = New ByteEx
     
-    If p_Value > 0# Then
+    If p_Value > 0@ Then
         
         If p_Value < B_MX Then ToByte.Value = p_Value Else ToByte.Value = B_MX
     
     End If
+
+End Function
+
+Public Function ToDouble() As DoubleEx
+    
+    Set ToDouble = New DoubleEx
+    
+    ToDouble.Value = p_Value
 
 End Function
 

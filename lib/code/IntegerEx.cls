@@ -82,11 +82,11 @@ Public Function Parse(ByRef Value As Variant) As IntegerEx
     
     Select Case x
         
-        Case 2&, 11&, 17& 'INTEGER, BOOLEAN, BYTE
+        Case vbInteger, vbBoolean, vbByte
             
             p_Value = Value
         
-        Case 3& To 8&, 14& 'LONG, SINGLE, DOUBLE, DATE, STRING, DECIMAL
+        Case vbLong To vbString, vbDecimal
             
             If x = 8& Then d = ToNumber(Value)
             

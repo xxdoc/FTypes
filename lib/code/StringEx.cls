@@ -99,6 +99,14 @@ Public Function Clone() As StringEx
 
 End Function
 
+Public Function Compare(ByRef CompareString As String, Optional ByVal CompareMethod As VbCompareMethod) As IntegerEx
+    
+    Set Compare = New IntegerEx
+    
+    Compare.Value = StrComp(VBA.Left$(p_Value, p_ValueLen), CompareString, CompareMethod)
+
+End Function
+
 Public Function Concat(ByRef ConcatString As String) As StringEx
     
     Dim l As Long
@@ -198,6 +206,43 @@ Public Function Lower() As StringEx
     Set Lower = Me
     
     If p_ValueLen Then CharLowerBuffW p_ValuePtr, p_ValueLen
+
+End Function
+
+Public Function PadLeft(ByVal Width As Long) As StringEx
+    
+    Dim x As Long
+    
+    Set PadLeft = Me
+    
+    If p_ValueLen > 0& And Width > p_ValueLen Then
+        
+        x = Width - p_ValueLen
+        
+        BufferRedim x, False
+        
+        RtlMoveMemory ByVal p_ValuePtr + x + x, ByVal p_ValuePtr, (p_ValueLen - x) * 2&
+        RtlMoveMemory ByVal p_ValuePtr, ByVal StrPtr(Space$(x)), x + x
+    
+    End If
+
+End Function
+
+Public Function PadRight(ByVal Width As Long) As StringEx
+    
+    Dim x As Long
+    
+    Set PadRight = Me
+    
+    If p_ValueLen > 0& And Width > p_ValueLen Then
+        
+        x = Width - p_ValueLen
+        
+        BufferRedim x, False
+        
+        RtlMoveMemory ByVal p_ValuePtr + ((p_ValueLen - x) * 2&), ByVal StrPtr(Space$(x)), x + x
+    
+    End If
 
 End Function
 
@@ -375,6 +420,54 @@ Public Function Right(ByVal Length As Long) As StringEx
 
 End Function
 
+Public Function Split(Optional ByRef Delimeter As String, Optional ByVal Limit As Long = L_NG, Optional ByVal CompareMethod As VbCompareMethod, Optional ByVal ArrayType As VbVarType = vbString) As ArrayEx
+    
+    On Error Resume Next
+    
+    Dim i As Long
+    Dim l As Long
+    Dim p As Long
+    Dim s As String
+    Dim x As Long
+    Dim y As Long
+    
+    Set Split = New ArrayEx
+    
+    Split.Initialize ArrayType, p_ValueLen + L_NG, True
+    
+    If p_ValueLen > 0& And Len(Delimeter) > 0& Then
+        
+        s = Space$(p_ValueLen)
+        p = StrPtr(s)
+        
+        Do
+            
+            x = InStr(x + 1&, p_Value, Delimeter, CompareMethod)
+            
+            If x = 0& Or x > p_ValueLen Then x = p_ValueLen + 1&
+            
+            l = x - y + L_NG
+            
+            RtlMoveMemory ByVal p, ByVal p_ValuePtr + y + y, l + l
+            Split.Item(i) = VBA.Left$(s, l)
+            
+            i = i + 1&
+            y = x
+        
+        Loop While y < p_ValueLen
+        
+        If Limit > L_NG And Limit < i Then i = Limit Else i = i + L_NG
+        
+        Split.Initialize ArrayType, i
+    
+    Else
+        
+        Split.Parse VBA.Left$(p_Value, p_ValueLen)
+    
+    End If
+
+End Function
+
 Public Function ToArray(Optional ByVal AsANSI As Boolean) As ArrayEx
     
     Dim x As Long
@@ -398,15 +491,6 @@ Public Function ToDouble() As DoubleEx
     Set ToDouble = New DoubleEx
     
     If p_ValueLen Then ToDouble.Parse VBA.Left$(p_Value, p_ValueLen)
-
-End Function
-
-Public Function Trim() As StringEx
-    
-    Set Trim = Me
-    
-    LTrim
-    RTrim
 
 End Function
 

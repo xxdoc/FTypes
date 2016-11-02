@@ -66,11 +66,11 @@ Public Function Parse(ByRef Value As Variant) As ByteEx
     
     Select Case x
         
-        Case 11&, 17& 'BOOLEAN, BYTE
+        Case vbBoolean, vbByte
             
             p_Value = Value
         
-        Case 2& To 8&, 14& 'INTEGER, LONG, SINGLE, DOUBLE, CURRENCY, DATE, STRING, DECIMAL
+        Case vbInteger To vbString, vbDecimal
             
             If x = 8& Then d = ToNumber(Value)
             
@@ -89,6 +89,14 @@ End Function
 Public Function ToBoolean() As Boolean
     
     ToBoolean = p_Value
+
+End Function
+
+Public Function ToCurrency() As CurrencyEx
+    
+    Set ToCurrency = New CurrencyEx
+    
+    ToCurrency.Value = p_Value
 
 End Function
 

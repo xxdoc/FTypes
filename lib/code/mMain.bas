@@ -21,8 +21,8 @@ End Type
 'CONSTANTS
 
 Public Const B_MX As Byte = 255
-Public Const D_MN As Double = 1E+308
-Public Const D_MX As Double = -1E+308
+Public Const D_MN As Double = -1.79769313486231E+308
+Public Const D_MX As Double = 1.79769313486231E+308
 Public Const I_MN As Integer = -32768
 Public Const I_MX As Integer = 32767
 Public Const L_NG As Long = -1&

@@ -32,6 +32,12 @@ Public Property Get ElementSize() As Long
 
 End Property
 
+Public Property Let Item(ByVal Index As Long, ByRef NewValue As Variant)
+    
+    If p_Array.lVarType Then p_Value(Index) = NewValue
+
+End Property
+
 Public Property Get Pointer() As Long
     
     Pointer = p_Array.lData
@@ -54,7 +60,7 @@ End Property
 
 Public Property Let Value(ByRef NewValue As Variant)
     
-    If VarType(NewValue) = vbArray Then
+    If (VarType(NewValue) And vbArray) = vbArray Then
         
         p_Value = NewValue
         
@@ -66,7 +72,7 @@ End Property
 
 'ROUTINES
 
-Friend Sub Initialize(ByVal ArrayType As VbVarType, ByVal Size As Long)
+Friend Sub Initialize(ByVal ArrayType As VbVarType, ByVal Size As Long, Optional ByVal FromScratch As Boolean)
     
     Select Case ArrayType
         Case vbBoolean: ReDim p_Value(Size) As Boolean
@@ -75,9 +81,9 @@ Friend Sub Initialize(ByVal ArrayType As VbVarType, ByVal Size As Long)
         Case vbDouble, vbDecimal: ReDim p_Value(Size) As Double
         Case vbInteger, vbError: ReDim p_Value(Size) As Integer
         Case vbLong: ReDim p_Value(Size) As Long
-        Case vbSingle: ReDim p_Value(Size) As Single
-        Case vbString, vbDate: ReDim p_Value(Size) As String
-        Case Else: Exit Sub
+        Case vbSingle: If FromScratch Then ReDim p_Value(Size) As Single Else ReDim Preserve p_Value(Size) As Single
+        Case vbString, vbDate: If FromScratch Then ReDim p_Value(Size) As String Else ReDim Preserve p_Value(Size) As String
+        Case Else: If FromScratch Then ReDim p_Value(Size) As Variant Else ReDim Preserve p_Value(Size) As Variant
     End Select
     
     RArrPt p_Value, p_Array
@@ -96,7 +102,7 @@ Public Function Parse(ByRef Value As Variant) As ArrayEx
     
     Set Parse = Me
     
-    Initialize VarType(Value), 0&
+    Initialize VarType(Value), 0&, True
     
     p_Value(0&) = Value
 
