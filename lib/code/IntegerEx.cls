@@ -13,6 +13,11 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+'CONSTANTS
+
+Private Const I_MN As Integer = -32768
+Private Const I_MX As Integer = 32767
+
 'VARIABLES
 
 Private p_Value As Integer
@@ -57,7 +62,7 @@ Public Property Get WordLow() As ByteEx
     
     Set WordLow = New ByteEx
     
-    WordLow.Value = p_Value And B_MX
+    WordLow.Value = p_Value And WordLow.Max
 
 End Property
 
@@ -74,21 +79,28 @@ End Function
 Public Function Parse(ByRef Value As Variant) As IntegerEx
     
     Dim d As Double
-    Dim x As Long
     
     Set Parse = Me
     
-    x = VarType(Value)
-    
-    Select Case x
+    Select Case VarType(Value)
         
         Case vbInteger, vbBoolean, vbByte
             
             p_Value = Value
         
-        Case vbLong To vbString, vbDecimal
+        Case vbLong To vbDate, vbDecimal, vbError
             
-            If x = 8& Then d = ToNumber(Value)
+            If Value > I_MN Then
+                
+                If Value < I_MX Then p_Value = Value Else p_Value = I_MX
+            
+            Else
+                p_Value = I_MN
+            End If
+        
+        Case vbString
+            
+            d = ToNumber(Value)
             
             If d > I_MN Then
                 
@@ -106,6 +118,14 @@ Public Function Parse(ByRef Value As Variant) As IntegerEx
 
 End Function
 
+Public Function ToArray() As ArrayEx
+    
+    Set ToArray = New ArrayEx
+    
+    ToArray.Parse p_Value
+
+End Function
+
 Public Function ToBoolean() As Boolean
     
     ToBoolean = p_Value
@@ -118,9 +138,17 @@ Public Function ToByte() As ByteEx
     
     If p_Value > 0 Then
         
-        If p_Value < B_MX Then ToByte.Value = p_Value Else ToByte.Value = B_MX
+        If p_Value < ToByte.Max Then ToByte.Value = p_Value Else ToByte.Value = ToByte.Max
     
     End If
+
+End Function
+
+Public Function ToCurrency() As CurrencyEx
+    
+    Set ToCurrency = New CurrencyEx
+    
+    ToCurrency.Value = p_Value
 
 End Function
 

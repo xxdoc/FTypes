@@ -13,11 +13,28 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+'CONSTANTS
+
+Private Const C_MN As Currency = -922337203685477.5807@
+Private Const C_MX As Currency = 922337203685477.5807@
+
 'VARIABLES
 
 Private p_Value As Currency
 
 'PROPERTIES
+
+Public Property Get Max() As Currency
+    
+    Max = C_MX
+
+End Property
+
+Public Property Get Min() As Currency
+    
+    Min = C_MN
+
+End Property
 
 Public Property Get Value() As Currency
 Attribute Value.VB_UserMemId = 0
@@ -45,21 +62,47 @@ End Function
 
 Public Function Parse(ByRef Value As Variant) As CurrencyEx
     
+    Dim d As Double
+    
     Set Parse = Me
     
     Select Case VarType(Value)
         
-        Case vbBoolean, vbByte, vbCurrency, vbDate, vbInteger, vbLong
+        Case vbBoolean, vbByte, vbCurrency, vbDate, vbError, vbInteger, vbLong
             
             p_Value = Value
         
-        Case vbDecimal, vbDouble, vbSingle, vbString
+        Case vbDecimal, vbDouble, vbSingle
+            
+            If Value > C_MN Then
+                If Value < C_MX Then p_Value = Value Else p_Value = C_MX
+            Else
+                p_Value = C_MN
+            End If
+        
+        Case vbString
+            
+            d = ToNumber(Value)
+            
+            If d > C_MN Then
+                If d < C_MX Then p_Value = d Else p_Value = C_MX
+            Else
+                p_Value = C_MN
+            End If
         
         Case Else
             
             p_Value = 0@
     
     End Select
+
+End Function
+
+Public Function ToArray() As ArrayEx
+    
+    Set ToArray = New ArrayEx
+    
+    ToArray.Parse p_Value
 
 End Function
 
@@ -75,7 +118,7 @@ Public Function ToByte() As ByteEx
     
     If p_Value > 0@ Then
         
-        If p_Value < B_MX Then ToByte.Value = p_Value Else ToByte.Value = B_MX
+        If p_Value < ToByte.Max Then ToByte.Value = p_Value Else ToByte.Value = ToByte.Max
     
     End If
 
@@ -93,13 +136,17 @@ Public Function ToInteger() As IntegerEx
     
     Set ToInteger = New IntegerEx
     
-    If p_Value > I_MN Then
+    With ToInteger
         
-        If p_Value < I_MX Then ToInteger.Value = p_Value Else ToInteger.Value = I_MX
+        If p_Value > .Min Then
+            
+            If p_Value < .Max Then .Value = p_Value Else .Value = .Max
+        
+        Else
+            .Value = .Min
+        End If
     
-    Else
-        ToInteger.Value = I_MN
-    End If
+    End With
 
 End Function
 
@@ -107,13 +154,17 @@ Public Function ToLong() As LongEx
     
     Set ToLong = New LongEx
     
-    If p_Value > L_MN Then
+    With ToLong
         
-        If p_Value < L_MX Then ToLong.Value = p_Value Else ToLong.Value = L_MX
+        If p_Value > .Min Then
+            
+            If p_Value < .Max Then .Value = p_Value Else .Value = .Max
+        
+        Else
+            .Value = .Min
+        End If
     
-    Else
-        ToLong.Value = L_MN
-    End If
+    End With
 
 End Function
 

@@ -13,6 +13,11 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+'CONSTANTS
+
+Private Const L_MN As Long = &H80000000
+Private Const L_MX As Long = 2147483647
+
 'VARIABLES
 
 Private p_Value As Long
@@ -106,6 +111,14 @@ Public Function Parse(ByRef Value As Variant) As LongEx
 
 End Function
 
+Public Function ToArray() As ArrayEx
+    
+    Set ToArray = New ArrayEx
+    
+    ToArray.Parse p_Value
+
+End Function
+
 Public Function ToBoolean() As Boolean
     
     ToBoolean = p_Value
@@ -118,9 +131,17 @@ Public Function ToByte() As ByteEx
     
     If p_Value > 0& Then
         
-        If p_Value < B_MX Then ToByte.Value = p_Value Else ToByte.Value = B_MX
+        If p_Value < ToByte.Max Then ToByte.Value = p_Value Else ToByte.Value = ToByte.Max
     
     End If
+
+End Function
+
+Public Function ToCurrency() As CurrencyEx
+    
+    Set ToCurrency = New CurrencyEx
+    
+    ToCurrency.Value = p_Value
 
 End Function
 
@@ -136,13 +157,17 @@ Public Function ToInteger() As IntegerEx
     
     Set ToInteger = New IntegerEx
     
-    If p_Value > I_MN Then
+    With ToInteger
         
-        If p_Value < I_MX Then ToInteger.Value = p_Value Else ToInteger.Value = I_MX
+        If p_Value > .Min Then
+            
+            If p_Value < .Max Then .Value = p_Value Else .Value = .Max
+        
+        Else
+            .Value = .Min
+        End If
     
-    Else
-        ToInteger.Value = I_MN
-    End If
+    End With
 
 End Function
 

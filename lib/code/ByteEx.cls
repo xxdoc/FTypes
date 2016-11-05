@@ -13,6 +13,10 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+'CONSTANTS
+
+Private Const B_MX As Byte = 255
+
 'VARIABLES
 
 Private p_Value As Byte
@@ -58,24 +62,31 @@ End Function
 Public Function Parse(ByRef Value As Variant) As ByteEx
     
     Dim d As Double
-    Dim x As Long
     
     Set Parse = Me
     
-    x = VarType(Value)
-    
-    Select Case x
+    Select Case VarType(Value)
         
         Case vbBoolean, vbByte
             
             p_Value = Value
         
-        Case vbInteger To vbString, vbDecimal
+        Case vbInteger To vbDate, vbDecimal, vbError
             
-            If x = 8& Then d = ToNumber(Value)
+            If Value > 0 Then
+                If Value < B_MX Then p_Value = Value Else p_Value = B_MX
+            Else
+                p_Value = 0
+            End If
+        
+        Case vbString
+            
+            d = ToNumber(Value)
             
             If d > 0 Then
                 If d < B_MX Then p_Value = d Else p_Value = B_MX
+            Else
+                p_Value = 0
             End If
         
         Case Else
@@ -83,6 +94,14 @@ Public Function Parse(ByRef Value As Variant) As ByteEx
             p_Value = 0
     
     End Select
+
+End Function
+
+Public Function ToArray() As ArrayEx
+    
+    Set ToArray = New ArrayEx
+    
+    ToArray.Parse p_Value
 
 End Function
 
