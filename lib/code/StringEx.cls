@@ -250,7 +250,7 @@ Public Function Parse(ByRef Value As Variant) As StringEx
     
     Set Parse = Me
     
-    Dim a As TSAFEARRAY
+    Dim a As ArrayEx
     Dim b As Integer
     Dim i As Long
     Dim j As Long
@@ -260,15 +260,19 @@ Public Function Parse(ByRef Value As Variant) As StringEx
     
     Select Case x
         
-        Case 2& To 8&, 10&, 11&, 14&, 17& 'INTEGER, LONG, SINGLE, DOUBLE, CURRENCY, DATE, STRING, ERROR, BOOLEAN, DECIMAL, BYTE
+        Case vbInteger To vbString, vbError, vbBoolean, vbDecimal, vbByte
             
             Me.Value = Value
         
-        Case 8209& 'BYTE array
+        Case vbArray + vbByte
             
-            If RArrPt(Value, a) = 1& Then 'get array info
-                
-                x = a.uBounds(0).x 'get items count
+            Set a = New ArrayEx
+            
+            a.Value = Value
+            
+            If a.Dimensions = 1& Then
+            
+                x = a.Elements 'get items count
                 
                 If x Mod 2& Then 'odd bytes count (ANSI, UTF-8)
                     
@@ -276,12 +280,12 @@ Public Function Parse(ByRef Value As Variant) As StringEx
                         
                         If Value(0) = 239 And Value(1) = 187 And Value(2) = 191 Then j = 3& 'check for UTF-8 byte order mark
                         
-                        i = MultiByteToWideChar(65001, 8&, ByVal a.lData, x, ByVal 0&, 0&) 'estimate buffer size (with MB_ERR_INVALID_CHARS flag)
+                        i = MultiByteToWideChar(65001, 8&, ByVal a.Data, x, ByVal 0&, 0&) 'estimate buffer size (with MB_ERR_INVALID_CHARS flag)
                         
                         If i Then '7-bit ANSI or UTF-8
                             
                             BufferRedim i - ((j > 0&) * L_NG), True
-                            MultiByteToWideChar 65001, 0&, ByVal a.lData + j, x, ByVal p_ValuePtr, p_ValueLen 'convert multi-bytes
+                            MultiByteToWideChar 65001, 0&, ByVal a.Data + j, x, ByVal p_ValuePtr, p_ValueLen 'convert multi-bytes
                             
                             Exit Function
                         
@@ -290,7 +294,7 @@ Public Function Parse(ByRef Value As Variant) As StringEx
                     End If
                     
                     BufferRedim x, True
-                    RtlMoveMemory ByVal p_ValuePtr, ByVal a.lData, x 'copy bytes as 8-bit ANSI
+                    RtlMoveMemory ByVal p_ValuePtr, ByVal a.Data, x 'copy bytes as 8-bit ANSI
                 
                 ElseIf x > 0& Then 'even bytes count (ANSI, UTF-8, UTF-16 BE/LE)
                     
@@ -305,9 +309,9 @@ Public Function Parse(ByRef Value As Variant) As StringEx
                             If Value(1) = 255 Then 'UTF-16 Big Endian
                                 
                                 For j = 2& To x + L_NG Step 2& 'convert to Little Endian order
-                                    RtlMoveMemory b, ByVal a.lData + j, 2&
+                                    RtlMoveMemory b, ByVal a.Data + j, 2&
                                     b = (((b And &HFF00) \ &H100) And &HFF) Or (b And &H7F) * &H100 Or (b And &H80) * &HFF00 'swap integer low & high words
-                                    RtlMoveMemory ByVal a.lData + j, b, 2&
+                                    RtlMoveMemory ByVal a.Data + j, b, 2&
                                 Next j
                                 
                                 i = 2&
@@ -320,12 +324,12 @@ Public Function Parse(ByRef Value As Variant) As StringEx
                                 
                                 If Value(1) = 187 And Value(2) = 191 Then 'UTF-8
                                     
-                                    i = MultiByteToWideChar(65001, 8&, ByVal a.lData, x, ByVal 0&, 0&) 'estimate buffer size (with MB_ERR_INVALID_CHARS flag)
+                                    i = MultiByteToWideChar(65001, 8&, ByVal a.Data, x, ByVal 0&, 0&) 'estimate buffer size (with MB_ERR_INVALID_CHARS flag)
                                     
                                     If i Then
                                         
                                         BufferRedim i + L_NG, True
-                                        MultiByteToWideChar 65001, 0&, ByVal a.lData + 3&, x, ByVal p_ValuePtr, p_ValueLen 'convert multi-bytes
+                                        MultiByteToWideChar 65001, 0&, ByVal a.Data + 3&, x, ByVal p_ValuePtr, p_ValueLen 'convert multi-bytes
                                         
                                         Exit Function
                                     
@@ -339,16 +343,16 @@ Public Function Parse(ByRef Value As Variant) As StringEx
                     
                     If i = 0& Then 'no BOM
                         
-                        If IsTextUnicode(ByVal a.lData, x, 7&) = 0& Then 'if IS_TEXT_UNICODE_ASCII16, IS_TEXT_UNICODE_STATISTICS and IS_TEXT_UNICODE_CONTROLS tests fail
+                        If IsTextUnicode(ByVal a.Data, x, 7&) = 0& Then 'if IS_TEXT_UNICODE_ASCII16, IS_TEXT_UNICODE_STATISTICS and IS_TEXT_UNICODE_CONTROLS tests fail
                             
-                            i = MultiByteToWideChar(65001, 8&, ByVal a.lData, x, ByVal 0&, 0&) 'estimate buffer size (with MB_ERR_INVALID_CHARS flag)
+                            i = MultiByteToWideChar(65001, 8&, ByVal a.Data, x, ByVal 0&, 0&) 'estimate buffer size (with MB_ERR_INVALID_CHARS flag)
                             
                             If i Then '7-bit ANSI or UTF-8
                                 BufferRedim i, True
-                                MultiByteToWideChar 65001, 0&, ByVal a.lData, x, ByVal p_ValuePtr, p_ValueLen 'convert multi-bytes
+                                MultiByteToWideChar 65001, 0&, ByVal a.Data, x, ByVal p_ValuePtr, p_ValueLen 'convert multi-bytes
                             Else '8-bit ANSI or UTF-16 case (currently difference can not be determined correctly, f.e. Chinese double-byte encoded text is recognized as ANSI)
                                 BufferRedim x, True
-                                RtlMoveMemory ByVal p_Value, ByVal a.lData, x 'copy bytes as 8-bit ANSI
+                                RtlMoveMemory ByVal p_Value, ByVal a.Data, x 'copy bytes as 8-bit ANSI
                             End If
                             
                             Exit Function
@@ -358,11 +362,13 @@ Public Function Parse(ByRef Value As Variant) As StringEx
                     End If
                     
                     BufferRedim (x - i) \ 2&, True
-                    RtlMoveMemory ByVal p_ValuePtr, ByVal a.lData + i, x - i 'copy bytes as Unicode
+                    RtlMoveMemory ByVal p_ValuePtr, ByVal a.Data + i, x - i 'copy bytes as Unicode
                 
                 End If
             
             End If
+            
+            Set a = Nothing
         
         Case Else
             
@@ -433,7 +439,7 @@ Public Function Split(Optional ByRef Delimeter As String, Optional ByVal Limit A
     
     Set Split = New ArrayEx
     
-    Split.Initialize ArrayType, p_ValueLen + L_NG, True
+    Split.Create ArrayType, 1&, Array(0&, p_ValueLen + L_NG)
     
     If p_ValueLen > 0& And Len(Delimeter) > 0& Then
         
@@ -449,7 +455,18 @@ Public Function Split(Optional ByRef Delimeter As String, Optional ByVal Limit A
             l = x - y + L_NG
             
             RtlMoveMemory ByVal p, ByVal p_ValuePtr + y + y, l + l
-            Split.Item(i) = VBA.Left$(s, l)
+            
+            Select Case Split.Type_
+                Case vbBoolean: Split.Item(i) = CBool(VBA.Left$(s, l))
+                Case vbByte: Split.Item(i) = CByte(VBA.Left$(s, l))
+                Case vbCurrency: Split.Item(i) = CCur(VBA.Left$(s, l))
+                Case vbDate, vbError, vbLong: Split.Item(i) = CLng(VBA.Left$(s, l))
+                Case vbDecimal: Split.Item(i) = CDec(VBA.Left$(s, l))
+                Case vbDouble: Split.Item(i) = CDbl(VBA.Left$(s, l))
+                Case vbInteger: Split.Item(i) = CInt(VBA.Left$(s, l))
+                Case vbSingle: Split.Item(i) = CSng(VBA.Left$(s, l))
+                Case vbString: Split.Item(i) = VBA.Left$(s, l)
+            End Select
             
             i = i + 1&
             y = x
@@ -458,7 +475,7 @@ Public Function Split(Optional ByRef Delimeter As String, Optional ByVal Limit A
         
         If Limit > L_NG And Limit < i Then i = Limit Else i = i + L_NG
         
-        Split.Initialize ArrayType, i
+        Split.Resize i
     
     Else
         
@@ -478,9 +495,9 @@ Public Function ToArray(Optional ByVal AsANSI As Boolean) As ArrayEx
         
         x = p_ValueLen * (((Not AsANSI) * L_NG) + 1&)
         
-        ToArray.Initialize vbByte, x + L_NG
+        ToArray.Create vbByte, 1&, Array(0&, x + L_NG)
         
-        If AsANSI Then RtlMoveMemory ByVal ToArray.Pointer, ByVal p_Value, x Else RtlMoveMemory ByVal ToArray.Pointer, ByVal p_ValuePtr, x
+        If AsANSI Then RtlMoveMemory ByVal ToArray.Data, ByVal p_Value, x Else RtlMoveMemory ByVal ToArray.Data, ByVal p_ValuePtr, x
     
     End If
 
