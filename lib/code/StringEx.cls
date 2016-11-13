@@ -271,7 +271,7 @@ Public Function Parse(ByRef Value As Variant) As StringEx
             a.Value = Value
             
             If a.Dimensions = 1& Then
-            
+                
                 x = a.Elements 'get items count
                 
                 If x Mod 2& Then 'odd bytes count (ANSI, UTF-8)
@@ -439,9 +439,9 @@ Public Function Split(Optional ByRef Delimeter As String, Optional ByVal Limit A
     
     Set Split = New ArrayEx
     
-    Split.Create ArrayType, 1&, Array(0&, p_ValueLen + L_NG)
-    
     If p_ValueLen > 0& And Len(Delimeter) > 0& Then
+        
+        Split.Create ArrayType, 1&, Array(0&, p_ValueLen + L_NG)
         
         s = Space$(p_ValueLen)
         p = StrPtr(s)
@@ -456,17 +456,7 @@ Public Function Split(Optional ByRef Delimeter As String, Optional ByVal Limit A
             
             RtlMoveMemory ByVal p, ByVal p_ValuePtr + y + y, l + l
             
-            Select Case Split.Type_
-                Case vbBoolean: Split.Item(i) = CBool(VBA.Left$(s, l))
-                Case vbByte: Split.Item(i) = CByte(VBA.Left$(s, l))
-                Case vbCurrency: Split.Item(i) = CCur(VBA.Left$(s, l))
-                Case vbDate, vbError, vbLong: Split.Item(i) = CLng(VBA.Left$(s, l))
-                Case vbDecimal: Split.Item(i) = CDec(VBA.Left$(s, l))
-                Case vbDouble: Split.Item(i) = CDbl(VBA.Left$(s, l))
-                Case vbInteger: Split.Item(i) = CInt(VBA.Left$(s, l))
-                Case vbSingle: Split.Item(i) = CSng(VBA.Left$(s, l))
-                Case vbString: Split.Item(i) = VBA.Left$(s, l)
-            End Select
+            Split.Item(i) = VBA.Left$(s, l)
             
             i = i + 1&
             y = x
