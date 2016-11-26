@@ -190,11 +190,9 @@ Public Function Add(ByRef Range As Variant) As ArrayEx
         
         For i = 0& To x: b(i) = BoundU(i + 1&): Next i
         
-        i = a.iDims + L_NG
+        Resize Elements(Dimensions) + a.uBounds(0).lElements + L_NG
         
-        Resize Elements(Dimensions) + a.uBounds(i).lElements + L_NG
-        
-        For i = a.uBounds(i).lLowest To a.uBounds(i).lLowest + a.uBounds(i).lElements + L_NG
+        For i = a.uBounds(0).lLowest To a.uBounds(0).lLowest + a.uBounds(0).lElements + L_NG
             b(x) = b(x) + 1&
             ArrPutElement VarPtr(b(0)), Range(i)
         Next i

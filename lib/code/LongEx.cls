@@ -79,26 +79,29 @@ End Function
 Public Function Parse(ByRef Value As Variant) As LongEx
     
     Dim d As Double
-    Dim x As Long
     
     Set Parse = Me
     
-    x = VarType(Value)
-    
-    Select Case x
+    Select Case VarType(Value)
         
-        Case vbInteger, vbLong, vbDate, vbBoolean, vbByte
+        Case vbInteger, vbLong, vbDate, vbBoolean, vbByte, vbError
             
             p_Value = Value
         
-        Case vbSingle To vbCurrency, vbString, vbDecimal
+        Case vbSingle To vbCurrency, vbDecimal
             
-            If x = 8& Then d = ToNumber(Value)
+            If Value > L_MN Then
+                If Value < L_MX Then p_Value = Value Else p_Value = L_MX
+            Else
+                p_Value = L_MN
+            End If
+        
+        Case vbString
+            
+            d = ToNumber(Value)
             
             If d > L_MN Then
-                
                 If d < L_MX Then p_Value = d Else p_Value = L_MX
-            
             Else
                 p_Value = L_MN
             End If
