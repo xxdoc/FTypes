@@ -92,6 +92,14 @@ Public Function Parse(ByRef Value As Variant) As DoubleEx
 
 End Function
 
+Public Function Round(ByVal DecimalDigits As Long) As DoubleEx
+    
+    Set Round = Me
+    
+    p_Value = FormatNumber(p_Value, DecimalDigits)
+
+End Function
+
 Public Function ToArray() As ArrayEx
     
     Set ToArray = New ArrayEx
