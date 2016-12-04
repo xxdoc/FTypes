@@ -493,11 +493,11 @@ Public Function ToArray(Optional ByVal AsANSI As Boolean) As ArrayEx
 
 End Function
 
-Public Function ToDouble() As DoubleEx
+Public Function ToNumber() As StringEx
     
-    Set ToDouble = New DoubleEx
+    Set ToNumber = Me
     
-    If p_ValueLen Then ToDouble.Parse VBA.Left$(p_Value, p_ValueLen)
+    If p_ValueLen Then Value = mMain.ToNumber(VBA.Left$(p_Value, p_ValueLen))
 
 End Function
 
