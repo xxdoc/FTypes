@@ -124,6 +124,14 @@ Public Function ToByte() As ByteEx
 
 End Function
 
+Public Function ToDecimal() As DecimalEx
+    
+    Set ToDecimal = New DecimalEx
+    
+    ToDecimal.Value = p_Value
+
+End Function
+
 Public Function ToDouble() As DoubleEx
     
     Set ToDouble = New DoubleEx

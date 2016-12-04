@@ -144,6 +144,24 @@ Public Function ToCurrency() As CurrencyEx
 
 End Function
 
+Public Function ToDecimal() As DecimalEx
+    
+    Set ToDecimal = New DecimalEx
+    
+    With ToDecimal
+        
+        If p_Value > .Min Then
+            
+            If p_Value < .Max Then .Value = p_Value Else .Value = .Max
+        
+        Else
+            .Value = .Min
+        End If
+    
+    End With
+
+End Function
+
 Public Function ToInteger() As IntegerEx
     
     Set ToInteger = New IntegerEx
