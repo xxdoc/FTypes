@@ -27,6 +27,12 @@ End Sub
 
 'PROPERTIES
 
+Public Property Get Length() As Long
+    
+    Length = 14&
+
+End Property
+
 Public Property Get Max() As Variant
     
     Max = CDec("79228162514264337593543950335")
@@ -36,6 +42,12 @@ End Property
 Public Property Get Min() As Variant
     
     Min = CDec("-79228162514264337593543950335")
+
+End Property
+
+Public Property Get Pointer() As Long
+    
+    Pointer = VarPtr(p_Value)
 
 End Property
 

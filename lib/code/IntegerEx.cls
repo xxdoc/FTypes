@@ -24,6 +24,12 @@ Private p_Value As Integer
 
 'PROPERTIES
 
+Public Property Get Length() As Long
+    
+    Length = 2&
+
+End Property
+
 Public Property Get Max() As Integer
     
     Max = I_MX
@@ -33,6 +39,12 @@ End Property
 Public Property Get Min() As Integer
     
     Min = I_MN
+
+End Property
+
+Public Property Get Pointer() As Long
+    
+    Pointer = VarPtr(p_Value)
 
 End Property
 

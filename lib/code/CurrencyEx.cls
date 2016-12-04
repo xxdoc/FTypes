@@ -24,6 +24,12 @@ Private p_Value As Currency
 
 'PROPERTIES
 
+Public Property Get Length() As Long
+    
+    Length = 8&
+
+End Property
+
 Public Property Get Max() As Currency
     
     Max = C_MX
@@ -33,6 +39,12 @@ End Property
 Public Property Get Min() As Currency
     
     Min = C_MN
+
+End Property
+
+Public Property Get Pointer() As Long
+    
+    Pointer = VarPtr(p_Value)
 
 End Property
 

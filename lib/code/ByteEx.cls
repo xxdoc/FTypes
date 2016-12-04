@@ -23,6 +23,12 @@ Private p_Value As Byte
 
 'PROPERTIES
 
+Public Property Get Length() As Long
+    
+    Length = 1&
+
+End Property
+
 Public Property Get Max() As Byte
     
     Max = B_MX
@@ -32,6 +38,12 @@ End Property
 Public Property Get Min() As Byte
     
     Min = 0
+
+End Property
+
+Public Property Get Pointer() As Long
+    
+    Pointer = VarPtr(p_Value)
 
 End Property
 
