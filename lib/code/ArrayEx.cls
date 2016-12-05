@@ -220,8 +220,6 @@ Public Function Create(ByVal ArrayType As VbVarType, ByVal Dimensions As Long, P
     
     Set Create = Me
     
-    SafeArrayDestroy p_Array.lPointer
-    
     If Dimensions > 0& Then
         
         ReDim b(UBound(Bounds))
@@ -230,6 +228,8 @@ Public Function Create(ByVal ArrayType As VbVarType, ByVal Dimensions As Long, P
             b(i).lLowest = Bounds(i)(0)
             b(i).lElements = Bounds(i)(1) - b(i).lLowest + 1&
         Next i
+        
+        SafeArrayDestroy p_Array.lPointer
         
         ArrPtr SafeArrayCreate(ArrayType Xor (vbArray * (((ArrayType And vbArray) = vbArray) * L_NG)), Dimensions, b(0)), p_Array
     
