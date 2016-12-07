@@ -23,7 +23,7 @@ Private Declare Function SafeArrayCopy Lib "oleaut32" (ByVal lSource As Long, By
 Private Declare Function SafeArrayCopyData Lib "oleaut32" (ByVal lSource As Long, ByVal lTarget As Any) As Long
 Private Declare Function SafeArrayCreate Lib "oleaut32" (ByVal lType As Integer, ByVal lDims As Long, uBounds As Any) As Long
 Private Declare Function SafeArrayDestroy Lib "oleaut32" (ByVal lArray As Long) As Long
-Private Declare Function SafeArrayGetElement Lib "oleaut32" (ByVal lArray As Long, uIndices As Any, ByVal lValue As Long) As Long
+Private Declare Function SafeArrayGetElement Lib "oleaut32" (ByVal lArray As Long, ByVal lIndices As Long, uValue As Any) As Long
 Private Declare Function SafeArrayPutElement Lib "oleaut32" (ByVal lArray As Long, ByVal lIndices As Long, uValue As Any) As Long
 Private Declare Function SafeArrayRedim Lib "oleaut32" (ByVal lArray As Long, uLastBound As TSAFEARRAYBOUND) As Long
 Private Declare Sub RtlZeroMemory Lib "kernel32" (uDestination As Any, ByVal lLen As Long)
@@ -103,9 +103,7 @@ Public Property Get Item(ParamArray Indexes()) As Variant
         
         For i = 0& To UBound(b): b(i) = Indexes(i): Next i
         
-        RtlMoveMemory Item, p_Array.lVarType, 2&
-        
-        SafeArrayGetElement p_Array.lPointer, b(0), VarPtr(Item) + 8& * ((p_Array.lVarType <> vbDecimal) * L_NG)
+        ArrGetElement VarPtr(b(0)), Item
         
         Erase b
     
@@ -345,6 +343,18 @@ Private Sub ArrPtr(ByVal lArray As Long, ByRef uPtr As TSAFEARRAY, Optional ByVa
 
 End Sub
 
+Private Sub ArrGetElement(ByVal Indexes As Long, ByRef Value As Variant)
+    
+    RtlMoveMemory Value, p_Array.lVarType, 2&
+    
+    Select Case p_Array.lVarType
+        Case vbDecimal: SafeArrayGetElement p_Array.lPointer, Indexes, ByVal VarPtr(Value)
+        Case vbVariant: SafeArrayGetElement p_Array.lPointer, Indexes, Value
+        Case Else: SafeArrayGetElement p_Array.lPointer, Indexes, ByVal VarPtr(Value) + 8&
+    End Select
+
+End Sub
+
 Private Sub ArrPutElement(ByVal Indexes As Long, ByRef Value As Variant)
     
     Select Case p_Array.lVarType
@@ -358,7 +368,7 @@ Private Sub ArrPutElement(ByVal Indexes As Long, ByRef Value As Variant)
         Case vbInteger: SafeArrayPutElement p_Array.lPointer, Indexes, CInt(Value)
         Case vbSingle: SafeArrayPutElement p_Array.lPointer, Indexes, CSng(Value)
         Case vbString: SafeArrayPutElement p_Array.lPointer, Indexes, ByVal StrPtr(Value)
-        Case Else: SafeArrayPutElement p_Array.lPointer, Indexes, ByVal VarPtr(Value) + 8&
+        Case Else: SafeArrayPutElement p_Array.lPointer, Indexes, Value
     End Select
 
 End Sub
