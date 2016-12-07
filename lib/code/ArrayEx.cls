@@ -20,18 +20,19 @@ Private p_Array As TSAFEARRAY
 'WINAPI
 
 Private Declare Function SafeArrayCopy Lib "oleaut32" (ByVal lSource As Long, ByVal lTarget As Any) As Long
+Private Declare Function SafeArrayCopyData Lib "oleaut32" (ByVal lSource As Long, ByVal lTarget As Any) As Long
 Private Declare Function SafeArrayCreate Lib "oleaut32" (ByVal lType As Integer, ByVal lDims As Long, uBounds As Any) As Long
 Private Declare Function SafeArrayDestroy Lib "oleaut32" (ByVal lArray As Long) As Long
 Private Declare Function SafeArrayGetElement Lib "oleaut32" (ByVal lArray As Long, uIndices As Any, ByVal lValue As Long) As Long
-Private Declare Function SafeArrayPutElement Lib "oleaut32" (ByVal lArray As Long, ByVal lIndices As Long, ByVal lValue As Long) As Long
-Private Declare Function SafeArrayRedim Lib "oleaut32" (ByVal lArray As Long, uBounds As TSAFEARRAYBOUND) As Long
+Private Declare Function SafeArrayPutElement Lib "oleaut32" (ByVal lArray As Long, ByVal lIndices As Long, uValue As Any) As Long
+Private Declare Function SafeArrayRedim Lib "oleaut32" (ByVal lArray As Long, uLastBound As TSAFEARRAYBOUND) As Long
 Private Declare Sub RtlZeroMemory Lib "kernel32" (uDestination As Any, ByVal lLen As Long)
 
 'EVENTS
 
 Private Sub Class_Terminate()
     
-    SafeArrayDestroy p_Array.lPointer
+    ArrDestroy
 
 End Sub
 
@@ -165,7 +166,23 @@ End Property
 
 Public Property Let Value(ByRef NewValue As Variant)
     
-    ArrPtr VarPtr(NewValue) * (((VarType(NewValue) And vbArray) = vbArray) * L_NG), p_Array, True
+    Dim a As TSAFEARRAY
+    Dim b() As TSAFEARRAYBOUND
+    Dim i As Long
+    
+    ArrPtr VarPtr(NewValue) * (((VarType(NewValue) And vbArray) = vbArray) * L_NG), a, True
+    
+    If a.lPointer Then
+        
+        ReDim b(a.iDims + L_NG)
+        
+        For i = 0& To a.iDims + L_NG: b(a.iDims - i + L_NG) = a.uBounds(i): Next i
+        
+        If ArrCreate(a.lVarType, a.iDims, b) Then SafeArrayCopyData a.lPointer, p_Array.lPointer
+        
+        Erase b
+    
+    End If
 
 End Property
 
@@ -229,13 +246,19 @@ Public Function Create(ByVal ArrayType As VbVarType, ByVal Dimensions As Long, P
             b(i).lElements = Bounds(i)(1) - b(i).lLowest + 1&
         Next i
         
-        SafeArrayDestroy p_Array.lPointer
-        
-        ArrPtr SafeArrayCreate(ArrayType Xor (vbArray * (((ArrayType And vbArray) = vbArray) * L_NG)), Dimensions, b(0)), p_Array
+        ArrCreate ArrayType, Dimensions, b
     
     End If
 
 ErrHandler:
+
+End Function
+
+Public Function Destroy() As ArrayEx
+    
+    Set Destroy = Me
+    
+    ArrDestroy
 
 End Function
 
@@ -265,6 +288,32 @@ Public Function Resize(ByVal NewUpperBound As Long) As ArrayEx
 
 End Function
 
+Private Function ArrCreate(ByVal lType As VbVarType, ByVal lDims As Long, ByRef uBounds() As TSAFEARRAYBOUND) As Boolean
+    
+    Dim x As Long
+    
+    ArrDestroy
+    
+    x = SafeArrayCreate(lType Xor (vbArray * (((lType And vbArray) = vbArray) * L_NG)), lDims, uBounds(0))
+    
+    If x Then
+        
+        ArrPtr x, p_Array
+        
+        ArrCreate = p_Array.lPointer
+    
+    End If
+
+End Function
+
+Private Sub ArrDestroy()
+    
+    SafeArrayDestroy p_Array.lPointer
+    
+    RtlZeroMemory p_Array, Len(p_Array)
+
+End Sub
+
 Private Sub ArrPtr(ByVal lArray As Long, ByRef uPtr As TSAFEARRAY, Optional ByVal IsExternal As Boolean)
     
     If lArray Then
@@ -292,8 +341,6 @@ Private Sub ArrPtr(ByVal lArray As Long, ByRef uPtr As TSAFEARRAY, Optional ByVa
         
         RtlMoveMemory uPtr.uBounds(0), ByVal uPtr.lPointer + 16&, uPtr.iDims * 8& 'get array dimensions info (in descending order) bytes starting from array pointer adress + 16 bytes offset
     
-    Else
-        RtlZeroMemory uPtr, 24&
     End If
 
 End Sub
@@ -301,13 +348,17 @@ End Sub
 Private Sub ArrPutElement(ByVal Indexes As Long, ByRef Value As Variant)
     
     Select Case p_Array.lVarType
-        
-        Case vbString: SafeArrayPutElement p_Array.lPointer, Indexes, StrPtr(Value)
-        
-        Case vbDecimal: SafeArrayPutElement p_Array.lPointer, Indexes, VarPtr(Value)
-        
-        Case Else: SafeArrayPutElement p_Array.lPointer, Indexes, VarPtr(Value) + 8&
-    
+        Case vbBoolean: SafeArrayPutElement p_Array.lPointer, Indexes, CBool(Value)
+        Case vbByte: SafeArrayPutElement p_Array.lPointer, Indexes, CByte(Value)
+        Case vbCurrency: SafeArrayPutElement p_Array.lPointer, Indexes, CCur(Value)
+        Case vbDate: SafeArrayPutElement p_Array.lPointer, Indexes, CDate(Value)
+        Case vbError, vbLong: SafeArrayPutElement p_Array.lPointer, Indexes, CLng(Value)
+        Case vbDecimal: SafeArrayPutElement p_Array.lPointer, Indexes, ByVal VarPtr(CDec(Value))
+        Case vbDouble: SafeArrayPutElement p_Array.lPointer, Indexes, CDbl(Value)
+        Case vbInteger: SafeArrayPutElement p_Array.lPointer, Indexes, CInt(Value)
+        Case vbSingle: SafeArrayPutElement p_Array.lPointer, Indexes, CSng(Value)
+        Case vbString: SafeArrayPutElement p_Array.lPointer, Indexes, ByVal StrPtr(Value)
+        Case Else: SafeArrayPutElement p_Array.lPointer, Indexes, ByVal VarPtr(Value) + 8&
     End Select
 
 End Sub
