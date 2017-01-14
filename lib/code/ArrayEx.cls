@@ -103,7 +103,7 @@ Public Property Get Item(ParamArray Indexes()) As Variant
         
         For i = 0& To UBound(b): b(i) = Indexes(i): Next i
         
-        ArrGetElement VarPtr(b(0)), Item
+        ArrElementGet VarPtr(b(0)), Item
         
         Erase b
     
@@ -126,7 +126,7 @@ Public Property Let Item(ParamArray Indexes(), ByRef NewValue As Variant)
         
         For i = 0& To UBound(b): b(i) = Indexes(i): Next i
         
-        ArrPutElement VarPtr(b(0)), NewValue
+        ArrElementSet VarPtr(b(0)), NewValue
         
         Erase b
     
@@ -209,7 +209,7 @@ Public Function Add(ByRef Range As Variant) As ArrayEx
         
         For i = a.uBounds(0).lLowest To a.uBounds(0).lLowest + a.uBounds(0).lElements + L_NG
             b(x) = b(x) + 1&
-            ArrPutElement VarPtr(b(0)), Range(i)
+            ArrElementSet VarPtr(b(0)), Range(i)
         Next i
         
         Erase b
@@ -245,6 +245,8 @@ Public Function Create(ByVal ArrayType As VbVarType, ByVal Dimensions As Long, P
         Next i
         
         ArrCreate ArrayType, Dimensions, b
+        
+        Erase b
     
     End If
 
@@ -312,6 +314,36 @@ Private Sub ArrDestroy()
 
 End Sub
 
+Private Sub ArrElementGet(ByVal Indexes As Long, ByRef Value As Variant)
+    
+    RtlMoveMemory Value, p_Array.lVarType, 2&
+    
+    Select Case p_Array.lVarType
+        Case vbDecimal: SafeArrayGetElement p_Array.lPointer, Indexes, ByVal VarPtr(Value)
+        Case vbVariant: SafeArrayGetElement p_Array.lPointer, Indexes, Value
+        Case Else: SafeArrayGetElement p_Array.lPointer, Indexes, ByVal VarPtr(Value) + 8&
+    End Select
+
+End Sub
+
+Private Sub ArrElementSet(ByVal Indexes As Long, ByRef Value As Variant)
+    
+    Select Case p_Array.lVarType
+        Case vbBoolean: SafeArrayPutElement p_Array.lPointer, Indexes, CBool(Value)
+        Case vbByte: SafeArrayPutElement p_Array.lPointer, Indexes, CByte(Value)
+        Case vbCurrency: SafeArrayPutElement p_Array.lPointer, Indexes, CCur(Value)
+        Case vbDate: SafeArrayPutElement p_Array.lPointer, Indexes, CDate(Value)
+        Case vbError, vbLong: SafeArrayPutElement p_Array.lPointer, Indexes, CLng(Value)
+        Case vbDecimal: SafeArrayPutElement p_Array.lPointer, Indexes, ByVal VarPtr(CDec(Value))
+        Case vbDouble: SafeArrayPutElement p_Array.lPointer, Indexes, CDbl(Value)
+        Case vbInteger: SafeArrayPutElement p_Array.lPointer, Indexes, CInt(Value)
+        Case vbSingle: SafeArrayPutElement p_Array.lPointer, Indexes, CSng(Value)
+        Case vbString: SafeArrayPutElement p_Array.lPointer, Indexes, ByVal StrPtr(Value)
+        Case Else: SafeArrayPutElement p_Array.lPointer, Indexes, Value
+    End Select
+
+End Sub
+
 Private Sub ArrPtr(ByVal lArray As Long, ByRef uPtr As TSAFEARRAY, Optional ByVal IsExternal As Boolean)
     
     If lArray Then
@@ -340,35 +372,5 @@ Private Sub ArrPtr(ByVal lArray As Long, ByRef uPtr As TSAFEARRAY, Optional ByVa
         RtlMoveMemory uPtr.uBounds(0), ByVal uPtr.lPointer + 16&, uPtr.iDims * 8& 'get array dimensions info (in descending order) bytes starting from array pointer adress + 16 bytes offset
     
     End If
-
-End Sub
-
-Private Sub ArrGetElement(ByVal Indexes As Long, ByRef Value As Variant)
-    
-    RtlMoveMemory Value, p_Array.lVarType, 2&
-    
-    Select Case p_Array.lVarType
-        Case vbDecimal: SafeArrayGetElement p_Array.lPointer, Indexes, ByVal VarPtr(Value)
-        Case vbVariant: SafeArrayGetElement p_Array.lPointer, Indexes, Value
-        Case Else: SafeArrayGetElement p_Array.lPointer, Indexes, ByVal VarPtr(Value) + 8&
-    End Select
-
-End Sub
-
-Private Sub ArrPutElement(ByVal Indexes As Long, ByRef Value As Variant)
-    
-    Select Case p_Array.lVarType
-        Case vbBoolean: SafeArrayPutElement p_Array.lPointer, Indexes, CBool(Value)
-        Case vbByte: SafeArrayPutElement p_Array.lPointer, Indexes, CByte(Value)
-        Case vbCurrency: SafeArrayPutElement p_Array.lPointer, Indexes, CCur(Value)
-        Case vbDate: SafeArrayPutElement p_Array.lPointer, Indexes, CDate(Value)
-        Case vbError, vbLong: SafeArrayPutElement p_Array.lPointer, Indexes, CLng(Value)
-        Case vbDecimal: SafeArrayPutElement p_Array.lPointer, Indexes, ByVal VarPtr(CDec(Value))
-        Case vbDouble: SafeArrayPutElement p_Array.lPointer, Indexes, CDbl(Value)
-        Case vbInteger: SafeArrayPutElement p_Array.lPointer, Indexes, CInt(Value)
-        Case vbSingle: SafeArrayPutElement p_Array.lPointer, Indexes, CSng(Value)
-        Case vbString: SafeArrayPutElement p_Array.lPointer, Indexes, ByVal StrPtr(Value)
-        Case Else: SafeArrayPutElement p_Array.lPointer, Indexes, Value
-    End Select
 
 End Sub
