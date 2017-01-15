@@ -83,11 +83,11 @@ End Property
 
 'ROUTINES
 
-Public Function Asc(ByVal Index As Long) As IntegerEx
+Public Function Asc(Optional ByVal Index As Long) As IntegerEx
     
     Set Asc = New IntegerEx
     
-    If Index > 0& And Index <= p_ValueLen Then Asc.Value = AscW(Mid$(p_Value, Index, 1&))
+    If Index > 0& And Index <= p_ValueLen Then Asc.Value = AscW(Mid$(p_Value, Index, 1&)) Else Asc.Value = AscW(p_Value)
 
 End Function
 
