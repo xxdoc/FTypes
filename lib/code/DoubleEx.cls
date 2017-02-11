@@ -106,9 +106,11 @@ End Function
 
 Public Function Round(ByVal DecimalDigits As Long) As DoubleEx
     
+    On Error Resume Next
+    
     Set Round = Me
     
-    p_Value = FormatNumber(p_Value, DecimalDigits)
+    p_Value = Math.Round(p_Value, DecimalDigits)
 
 End Function
 
@@ -120,9 +122,11 @@ Public Function ToArray() As ArrayEx
 
 End Function
 
-Public Function ToBoolean() As Boolean
+Public Function ToBoolean() As BooleanEx
     
-    ToBoolean = p_Value
+    Set ToBoolean = New BooleanEx
+    
+    ToBoolean.Value = p_Value
 
 End Function
 

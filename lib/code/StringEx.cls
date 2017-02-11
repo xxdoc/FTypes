@@ -73,7 +73,7 @@ Public Property Let Value(ByRef NewValue As String)
         
         BufferRedim l, True
         
-        RtlMoveMemory ByVal p_ValuePtr, ByVal StrPtr(NewValue), p_ValueLen + p_ValueLen
+        RtlMoveMemory ByVal p_ValuePtr, ByVal StrPtr(NewValue), p_ValueLen * 2&
     
     Else
         p_ValueLen = 0&
@@ -197,7 +197,7 @@ Public Function Left(ByVal Length As Long) As StringEx
     
     Set Left = Me
     
-    If p_ValueLen > 0& And Length >= 0& And Length < p_ValueLen Then p_ValueLen = Length
+    If Length >= 0& And Length < p_ValueLen Then p_ValueLen = Length
 
 End Function
 
@@ -416,7 +416,7 @@ Public Function Right(ByVal Length As Long) As StringEx
     
     Set Right = Me
     
-    If p_ValueLen > 0& And Length >= 0& And Length < p_ValueLen Then
+    If Length >= 0& And Length < p_ValueLen Then
         
         RtlMoveMemory ByVal p_ValuePtr, ByVal p_ValuePtr + ((p_ValueLen - Length) * 2&), Length + Length
         
@@ -519,7 +519,7 @@ Public Function TrimL() As StringEx
                 
                 p_ValueLen = p_ValueLen - x
                 
-                RtlMoveMemory ByVal p_ValuePtr, ByVal p_ValuePtr + x + x, p_ValueLen + p_ValueLen
+                RtlMoveMemory ByVal p_ValuePtr, ByVal p_ValuePtr + (x * 2&), p_ValueLen * 2&
             
             End If
         

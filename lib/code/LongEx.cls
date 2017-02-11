@@ -62,19 +62,15 @@ Public Property Let Value(ByVal NewValue As Long)
 
 End Property
 
-Public Property Get WordHigh() As IntegerEx
+Public Property Get WordHigh() As Integer
     
-    Set WordHigh = New IntegerEx
-    
-    WordHigh.Value = ((p_Value And &H7FFF0000) \ &H10000) Or (&H8000 And (p_Value < 0))
+    WordHigh = ((p_Value And &H7FFF0000) \ &H10000) Or (&H8000 And (p_Value < 0))
 
 End Property
 
-Public Property Get WordLow() As IntegerEx
+Public Property Get WordLow() As Integer
     
-    Set WordLow = New IntegerEx
-    
-    WordLow.Value = (p_Value And &H7FFF) Or (&H8000 And ((p_Value And &H8000&) = &H8000&))
+    WordLow = (p_Value And &H7FFF) Or (&H8000 And ((p_Value And &H8000&) = &H8000&))
 
 End Property
 
@@ -134,9 +130,11 @@ Public Function ToArray() As ArrayEx
 
 End Function
 
-Public Function ToBoolean() As Boolean
+Public Function ToBoolean() As BooleanEx
     
-    ToBoolean = p_Value
+    Set ToBoolean = New BooleanEx
+    
+    ToBoolean.Value = p_Value
 
 End Function
 

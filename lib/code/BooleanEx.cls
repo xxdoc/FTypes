@@ -6,21 +6,16 @@ BEGIN
   DataSourceBehavior  = 0  'vbNone
   MTSTransactionMode  = 0  'NotAnMTSObject
 END
-Attribute VB_Name = "IntegerEx"
+Attribute VB_Name = "BooleanEx"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
-'CONSTANTS
-
-Private Const I_MN As Integer = -32768
-Private Const I_MX As Integer = 32767
-
 'VARIABLES
 
-Private p_Value As Integer
+Private p_Value As Boolean
 
 'PROPERTIES
 
@@ -30,15 +25,15 @@ Public Property Get Length() As Long
 
 End Property
 
-Public Property Get Max() As Integer
+Public Property Get Max() As Boolean
     
-    Max = I_MX
+    Max = True
 
 End Property
 
-Public Property Get Min() As Integer
+Public Property Get Min() As Boolean
     
-    Min = I_MN
+    Min = False
 
 End Property
 
@@ -48,7 +43,7 @@ Public Property Get Pointer() As Long
 
 End Property
 
-Public Property Get Value() As Integer
+Public Property Get Value() As Boolean
 Attribute Value.VB_UserMemId = 0
 Attribute Value.VB_MemberFlags = "200"
     
@@ -56,85 +51,49 @@ Attribute Value.VB_MemberFlags = "200"
 
 End Property
 
-Public Property Let Value(ByVal NewValue As Integer)
+Public Property Let Value(ByVal NewValue As Boolean)
     
     p_Value = NewValue
 
 End Property
 
-Public Property Get WordHigh() As Byte
-    
-    WordHigh = (p_Value And &HFF00&) \ 256
-
-End Property
-
-Public Property Get WordLow() As Byte
-    
-    WordLow = p_Value And 255
-
-End Property
-
 'ROUTINES
 
-Public Function Clone() As IntegerEx
+Public Function Clone() As BooleanEx
     
-    Set Clone = New IntegerEx
+    Set Clone = New BooleanEx
     
     Clone.Value = p_Value
 
 End Function
 
-Public Function Parse(ByRef Value As Variant) As IntegerEx
-    
-    Dim d As Double
+Public Function Parse(ByRef Value As Variant) As BooleanEx
     
     Set Parse = Me
     
     Select Case VarType(Value)
         
-        Case vbInteger, vbBoolean, vbByte
+        Case vbInteger To vbDate, vbBoolean, vbByte, vbDecimal, vbError
             
             p_Value = Value
         
-        Case vbLong To vbDate, vbDecimal, vbError
-            
-            If Value > I_MN Then
-                
-                If Value < I_MX Then p_Value = Value Else p_Value = I_MX
-            
-            Else
-                p_Value = I_MN
-            End If
-        
         Case vbString
             
-            d = ToNumber(Value)
-            
-            If d > I_MN Then
-                
-                If d < I_MX Then p_Value = d Else p_Value = I_MX
-            
-            Else
-                p_Value = I_MN
-            End If
+            p_Value = ToNumber(Value)
         
         Case Else
             
-            p_Value = 0
+            p_Value = False
     
     End Select
 
 End Function
 
-Public Function Shift(ByVal ShiftBy As Integer) As IntegerEx
+Public Function Reverse() As BooleanEx
     
-    Dim x As Long
+    Set Reverse = Me
     
-    Set Shift = Me
-    
-    x = p_Value * 2 ^ ShiftBy
-    
-    If (x And &H8000&) Then p_Value = CInt(x And &H7FFF&) Or &H8000 Else p_Value = x And &HFFFF&
+    p_Value = Not p_Value
 
 End Function
 
@@ -146,23 +105,11 @@ Public Function ToArray() As ArrayEx
 
 End Function
 
-Public Function ToBoolean() As BooleanEx
-    
-    Set ToBoolean = New BooleanEx
-    
-    ToBoolean.Value = p_Value
-
-End Function
-
 Public Function ToByte() As ByteEx
     
     Set ToByte = New ByteEx
     
-    If p_Value > 0 Then
-        
-        If p_Value < ToByte.Max Then ToByte.Value = p_Value Else ToByte.Value = ToByte.Max
-    
-    End If
+    ToByte.Value = p_Value * L_NG
 
 End Function
 
@@ -187,6 +134,14 @@ Public Function ToDouble() As DoubleEx
     Set ToDouble = New DoubleEx
     
     ToDouble.Value = p_Value
+
+End Function
+
+Public Function ToInteger() As IntegerEx
+    
+    Set ToInteger = New IntegerEx
+    
+    ToInteger.Value = p_Value
 
 End Function
 

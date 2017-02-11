@@ -61,15 +61,9 @@ End Property
 
 Public Property Let Value(ByRef NewValue As Variant)
     
-    On Error GoTo ErrHandler
+    On Error Resume Next
     
     p_Value = CDec(NewValue)
-    
-    Exit Property
-
-ErrHandler:
-    
-    p_Value = CDec(0&)
 
 End Property
 
@@ -93,7 +87,11 @@ Public Function Parse(ByRef Value As Variant) As DecimalEx
     
     Select Case VarType(Value)
         
-        Case vbInteger To vbDate, vbBoolean, vbByte, vbDecimal, vbError
+        Case vbDecimal
+            
+            p_Value = Value
+        
+        Case vbInteger To vbDate, vbBoolean, vbByte, vbError
             
             p_Value = CDec(Value)
         
@@ -117,6 +115,16 @@ ErrHandler:
 
 End Function
 
+Public Function Round(ByVal DecimalDigits As Long) As DecimalEx
+    
+    On Error Resume Next
+    
+    Set Round = Me
+    
+    p_Value = Math.Round(p_Value, DecimalDigits)
+
+End Function
+
 Public Function ToArray() As ArrayEx
     
     Set ToArray = New ArrayEx
@@ -125,9 +133,11 @@ Public Function ToArray() As ArrayEx
 
 End Function
 
-Public Function ToBoolean() As Boolean
+Public Function ToBoolean() As BooleanEx
     
-    ToBoolean = p_Value
+    Set ToBoolean = New BooleanEx
+    
+    ToBoolean.Value = p_Value
 
 End Function
 
