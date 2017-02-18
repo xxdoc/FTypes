@@ -99,13 +99,19 @@ Public Property Get Item(ParamArray Indexes()) As Variant
     
     If p_Array.lPointer Then
         
-        ReDim b(UBound(Indexes))
+        If p_Array.iDims > 1 Then
+            
+            ReDim b(UBound(Indexes))
+            
+            For i = 0& To UBound(b): b(i) = Indexes(i): Next i
+            
+            ArrElementGet VarPtr(b(0)), Item
+            
+            Erase b
         
-        For i = 0& To UBound(b): b(i) = Indexes(i): Next i
-        
-        ArrElementGet VarPtr(b(0)), Item
-        
-        Erase b
+        Else
+            ArrElementGet VarPtr(CLng(Indexes(0))), Item
+        End If
     
     End If
 
@@ -122,13 +128,19 @@ Public Property Let Item(ParamArray Indexes(), ByRef NewValue As Variant)
     
     If p_Array.lPointer Then
         
-        ReDim b(UBound(Indexes))
+        If p_Array.iDims > 1 Then
+            
+            ReDim b(UBound(Indexes))
+            
+            For i = 0& To UBound(b): b(i) = Indexes(i): Next i
+            
+            ArrElementSet VarPtr(b(0)), NewValue
+            
+            Erase b
         
-        For i = 0& To UBound(b): b(i) = Indexes(i): Next i
-        
-        ArrElementSet VarPtr(b(0)), NewValue
-        
-        Erase b
+        Else
+            ArrElementSet VarPtr(CLng(Indexes(0))), NewValue
+        End If
     
     End If
 
@@ -186,33 +198,89 @@ End Property
 
 'ROUTINES
 
-Public Function Add(ByRef Range As Variant) As ArrayEx
+Public Function Add(ByRef Item As Variant) As ArrayEx
+    
+    Dim a(0) As TSAFEARRAYBOUND
+    Dim b() As Long
+    Dim x As Long
+    
+    Set Add = Me
+    
+    x = VarType(Item)
+    
+    If p_Array.lPointer = 0& Then
+        
+        a(0).lElements = 1&
+        
+        ArrCreate x, 1&, a
+        
+        ArrElementSet VarPtr(0&), Item
+    
+    ElseIf x = p_Array.lVarType Then
+        
+        p_Array.uBounds(0).lElements = p_Array.uBounds(0).lElements + 1&
+        
+        SafeArrayRedim p_Array.lPointer, p_Array.uBounds(0)
+        
+        If p_Array.iDims > 1& Then
+            
+            x = p_Array.iDims + L_NG
+            
+            ReDim b(x)
+            
+            For x = 0& To x: b(x) = BoundU(x + 1&): Next x
+            
+            ArrElementSet VarPtr(b(0)), Item
+            
+            Erase b
+        
+        Else
+            ArrElementSet VarPtr(BoundU), Item
+        End If
+    
+    End If
+
+End Function
+
+Public Function AddRange(ByRef Range As Variant) As ArrayEx
     
     Dim a As TSAFEARRAY
     Dim b() As Long
     Dim i As Long
     Dim x As Long
     
-    Set Add = Me
+    Set AddRange = Me
     
     ArrPtr VarPtr(Range) * (((VarType(Range) And vbArray) = vbArray) * L_NG), a, True
     
-    If p_Array.lPointer <> 0& And a.lPointer <> 0& And a.iDims = 1& And a.lVarType = p_Array.lVarType Then
+    If a.lPointer <> 0& And a.iDims = 1& Then
         
-        x = p_Array.iDims + L_NG
+        If p_Array.lPointer = 0& Then
+            
+            ArrCreate a.lVarType, 1&, a.uBounds
+            
+            For i = BoundL To BoundU: ArrElementSet VarPtr(i), Range(i): Next i
         
-        ReDim b(x)
+        ElseIf a.lVarType = p_Array.lVarType Then
+            
+            x = p_Array.iDims + L_NG
+            
+            ReDim b(x)
+            
+            For i = 0& To x: b(i) = BoundU(i + 1&): Next i
+            
+            p_Array.uBounds(0).lElements = p_Array.uBounds(0).lElements + a.uBounds(0).lElements
+            
+            SafeArrayRedim p_Array.lPointer, p_Array.uBounds(0)
+            
+            For i = a.uBounds(0).lLowest To a.uBounds(0).lLowest + a.uBounds(0).lElements + L_NG
+                b(x) = b(x) + 1&
+                ArrElementSet VarPtr(b(0)), Range(i)
+            Next i
+            
+            Erase b
         
-        For i = 0& To x: b(i) = BoundU(i + 1&): Next i
-        
-        Resize Elements(Dimensions) + a.uBounds(0).lElements + L_NG
-        
-        For i = a.uBounds(0).lLowest To a.uBounds(0).lLowest + a.uBounds(0).lElements + L_NG
-            b(x) = b(x) + 1&
-            ArrElementSet VarPtr(b(0)), Range(i)
-        Next i
-        
-        Erase b
+        End If
     
     End If
 
@@ -237,16 +305,20 @@ Public Function Create(ByVal ArrayType As VbVarType, ByVal Dimensions As Long, P
     
     If Dimensions > 0& Then
         
-        ReDim b(UBound(Bounds))
+        If Dimensions = (UBound(Bounds) + 1&) Then
+            
+            ReDim b(UBound(Bounds))
+            
+            For i = 0& To UBound(b)
+                b(i).lLowest = Bounds(i)(0)
+                b(i).lElements = Bounds(i)(1) - b(i).lLowest + 1&
+            Next i
+            
+            ArrCreate ArrayType, Dimensions, b
+            
+            Erase b
         
-        For i = 0& To UBound(b)
-            b(i).lLowest = Bounds(i)(0)
-            b(i).lElements = Bounds(i)(1) - b(i).lLowest + 1&
-        Next i
-        
-        ArrCreate ArrayType, Dimensions, b
-        
-        Erase b
+        End If
     
     End If
 
@@ -264,9 +336,13 @@ End Function
 
 Public Function Parse(ByRef Value As Variant) As ArrayEx
     
+    Dim b(0) As TSAFEARRAYBOUND
+    
     Set Parse = Me
     
-    Create(VarType(Value), 1&, Array(0&, 0&)).Item(0&) = Value
+    b(0).lElements = 1&
+    
+    If ArrCreate(VarType(Value), 1&, b) Then ArrElementSet VarPtr(b(0).lLowest), Value
 
 End Function
 
@@ -369,7 +445,7 @@ Private Sub ArrPtr(ByVal lArray As Long, ByRef uPtr As TSAFEARRAY, Optional ByVa
         
         ReDim uPtr.uBounds(uPtr.iDims + L_NG) 'allocate bounds member
         
-        RtlMoveMemory uPtr.uBounds(0), ByVal uPtr.lPointer + 16&, uPtr.iDims * 8& 'get array dimensions info (in descending order) bytes starting from array pointer adress + 16 bytes offset
+        RtlMoveMemory uPtr.uBounds(0), ByVal uPtr.lPointer + 16&, uPtr.iDims * 8& 'get array dimensions info bytes (in descending order) starting from array pointer adress + 16 bytes offset
     
     End If
 

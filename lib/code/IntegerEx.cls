@@ -126,18 +126,6 @@ Public Function Parse(ByRef Value As Variant) As IntegerEx
 
 End Function
 
-Public Function Shift(ByVal ShiftBy As Integer) As IntegerEx
-    
-    Dim x As Long
-    
-    Set Shift = Me
-    
-    x = p_Value * 2 ^ ShiftBy
-    
-    If (x And &H8000&) Then p_Value = CInt(x And &H7FFF&) Or &H8000 Else p_Value = x And &HFFFF&
-
-End Function
-
 Public Function ToArray() As ArrayEx
     
     Set ToArray = New ArrayEx
@@ -198,10 +186,10 @@ Public Function ToLong() As LongEx
 
 End Function
 
-Public Function ToString() As StringEx
+Public Function ToString(Optional ByRef Format As String) As StringEx
     
     Set ToString = New StringEx
     
-    ToString.Value = p_Value
+    If Len(Format) Then ToString.Value = Strings.Format$(p_Value, Format) Else ToString.Value = p_Value
 
 End Function

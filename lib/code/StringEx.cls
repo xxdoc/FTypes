@@ -87,7 +87,11 @@ Public Function Asc(Optional ByVal Index As Long) As IntegerEx
     
     Set Asc = New IntegerEx
     
-    If Index > 0& And Index <= p_ValueLen Then Asc.Value = AscW(Mid$(p_Value, Index, 1&)) Else Asc.Value = AscW(p_Value)
+    If p_ValueLen Then
+        
+        If Index > 0& And Index <= p_ValueLen Then Asc.Value = AscW(Mid$(p_Value, Index, 1&)) Else Asc.Value = AscW(p_Value)
+    
+    End If
 
 End Function
 
@@ -119,7 +123,7 @@ Public Function Concat(ByRef ConcatString As String) As StringEx
         
         BufferRedim l, False
         
-        RtlMoveMemory ByVal p_ValuePtr + ((p_ValueLen - l) * 2&), ByVal StrPtr(ConcatString), l + l
+        RtlMoveMemory ByVal p_ValuePtr + ((p_ValueLen - l) * 2&), ByVal StrPtr(ConcatString), l * 2&
     
     End If
 
@@ -139,7 +143,7 @@ Public Function Duplicate(ByVal Count As Long) As StringEx
         BufferRedim l * Count, False
         
         For i = 1& To Count
-            RtlMoveMemory ByVal p_ValuePtr + ((l * i) * 2&), ByVal p_ValuePtr, l + l
+            RtlMoveMemory ByVal p_ValuePtr + ((l * i) * 2&), ByVal p_ValuePtr, l * 2&
         Next i
     
     End If
@@ -206,6 +210,14 @@ Public Function Lower() As StringEx
     Set Lower = Me
     
     If p_ValueLen Then CharLowerBuffW p_ValuePtr, p_ValueLen
+
+End Function
+
+Public Function Numeric() As StringEx
+    
+    Set Numeric = Me
+    
+    If p_ValueLen Then Value = ToNumber(VBA.Left$(p_Value, p_ValueLen))
 
 End Function
 
@@ -493,14 +505,6 @@ Public Function ToArray(Optional ByVal AsANSI As Boolean) As ArrayEx
 
 End Function
 
-Public Function ToNumber() As StringEx
-    
-    Set ToNumber = Me
-    
-    If p_ValueLen Then Value = mMain.ToNumber(VBA.Left$(p_Value, p_ValueLen))
-
-End Function
-
 Public Function TrimL() As StringEx
     
     Dim x As Long
@@ -581,7 +585,7 @@ Private Sub BufferRedim(ByVal NewStringLen As Long, ByVal FromScratch As Boolean
             p_Value = Space$(p_ValueLenReal)
             p_ValuePtr = StrPtr(p_Value)
             
-            If x Then RtlMoveMemory ByVal p_ValuePtr, ByVal StrPtr(b), x + x
+            If x Then RtlMoveMemory ByVal p_ValuePtr, ByVal StrPtr(b), x * 2&
         
         End If
     
