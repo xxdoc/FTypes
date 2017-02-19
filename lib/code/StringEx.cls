@@ -25,6 +25,7 @@ Private p_ValuePtr As Long
 Private Declare Function CharLowerBuffW Lib "user32" (ByVal lStr As Long, ByVal lLength As Long) As Long
 Private Declare Function CharUpperBuffW Lib "user32" (ByVal lStr As Long, ByVal lLength As Long) As Long
 Private Declare Function IsTextUnicode Lib "advapi32" (ByRef uBuffer As Any, ByVal lBufferLen As Long, ByRef lResult As Long) As Long
+Private Declare Function lstrlenW Lib "kernel32" (ByVal lString As Long) As Long
 Private Declare Function MultiByteToWideChar Lib "kernel32" (ByVal lCodePage As Long, ByVal lFlags As Long, uMultiByte As Any, ByVal lMultiByteLen As Long, uWideCharStr As Any, ByVal lWideCharStrLen As Long) As Long
 
 'EVENTS
@@ -107,7 +108,7 @@ Public Function Compare(ByRef CompareString As String, Optional ByVal CompareMet
     
     Set Compare = New IntegerEx
     
-    Compare.Value = StrComp(VBA.Left$(p_Value, p_ValueLen), CompareString, CompareMethod)
+    If p_ValueLen Then Compare.Value = StrComp(VBA.Left$(p_Value, p_ValueLen), CompareString, CompareMethod)
 
 End Function
 
@@ -124,6 +125,28 @@ Public Function Concat(ByRef ConcatString As String) As StringEx
         BufferRedim l, False
         
         RtlMoveMemory ByVal p_ValuePtr + ((p_ValueLen - l) * 2&), ByVal StrPtr(ConcatString), l * 2&
+    
+    End If
+
+End Function
+
+Public Function ConcatPointer(ByVal ConcatStringPointer As Long) As StringEx
+    
+    Dim l As Long
+    
+    Set ConcatPointer = Me
+    
+    If ConcatStringPointer Then
+        
+        l = lstrlenW(ConcatStringPointer)
+        
+        If l Then
+            
+            BufferRedim l, False
+            
+            RtlMoveMemory ByVal p_ValuePtr + ((p_ValueLen - l) * 2&), ByVal ConcatStringPointer, l * 2&
+        
+        End If
     
     End If
 
@@ -502,6 +525,62 @@ Public Function ToArray(Optional ByVal AsANSI As Boolean) As ArrayEx
         If AsANSI Then RtlMoveMemory ByVal ToArray.Data, ByVal p_Value, x Else RtlMoveMemory ByVal ToArray.Data, ByVal p_ValuePtr, x
     
     End If
+
+End Function
+
+Public Function ToBoolean() As BooleanEx
+    
+    Set ToBoolean = New BooleanEx
+    
+    If p_ValueLen Then ToBoolean.Parse VBA.Left$(p_Value, p_ValueLen)
+
+End Function
+
+Public Function ToByte() As ByteEx
+    
+    Set ToByte = New ByteEx
+    
+    If p_ValueLen Then ToByte.Parse VBA.Left$(p_Value, p_ValueLen)
+
+End Function
+
+Public Function ToCurrency() As CurrencyEx
+    
+    Set ToCurrency = New CurrencyEx
+    
+    If p_ValueLen Then ToCurrency.Parse VBA.Left$(p_Value, p_ValueLen)
+
+End Function
+
+Public Function ToDecimal() As DecimalEx
+    
+    Set ToDecimal = New DecimalEx
+    
+    If p_ValueLen Then ToDecimal.Parse VBA.Left$(p_Value, p_ValueLen)
+
+End Function
+
+Public Function ToDouble() As DoubleEx
+    
+    Set ToDouble = New DoubleEx
+    
+    If p_ValueLen Then ToDouble.Parse VBA.Left$(p_Value, p_ValueLen)
+
+End Function
+
+Public Function ToInteger() As IntegerEx
+    
+    Set ToInteger = New IntegerEx
+    
+    If p_ValueLen Then ToInteger.Parse VBA.Left$(p_Value, p_ValueLen)
+
+End Function
+
+Public Function ToLong() As LongEx
+    
+    Set ToLong = New LongEx
+    
+    If p_ValueLen Then ToLong.Parse VBA.Left$(p_Value, p_ValueLen)
 
 End Function
 

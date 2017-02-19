@@ -103,9 +103,7 @@ Public Function ToNumber(ByVal sVal As String) As String
         End If
     
     Else
-        
         ToNumber = ChrW$(48&)
-    
     End If
 
 End Function
