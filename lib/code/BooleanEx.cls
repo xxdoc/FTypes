@@ -153,10 +153,10 @@ Public Function ToLong() As LongEx
 
 End Function
 
-Public Function ToString() As StringEx
+Public Function ToString(Optional ByRef Format As String) As StringEx
     
     Set ToString = New StringEx
     
-    ToString.Value = p_Value
+    If Len(Format) Then ToString.Value = Strings.Format$(p_Value, Format) Else ToString.Value = p_Value
 
 End Function

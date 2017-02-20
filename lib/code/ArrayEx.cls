@@ -294,33 +294,28 @@ Public Function Clone() As ArrayEx
 
 End Function
 
-Public Function Create(ByVal ArrayType As VbVarType, ByVal Dimensions As Long, ParamArray Bounds()) As ArrayEx
+Public Function Create(ByVal ArrayType As VbVarType, ParamArray Bounds()) As ArrayEx
     
     On Error GoTo ErrHandler
     
     Dim b() As TSAFEARRAYBOUND
     Dim i As Long
+    Dim x As Long
     
     Set Create = Me
     
-    If Dimensions > 0& Then
-        
-        If Dimensions = (UBound(Bounds) + 1&) Then
-            
-            ReDim b(UBound(Bounds))
-            
-            For i = 0& To UBound(b)
-                b(i).lLowest = Bounds(i)(0)
-                b(i).lElements = Bounds(i)(1) - b(i).lLowest + 1&
-            Next i
-            
-            ArrCreate ArrayType, Dimensions, b
-            
-            Erase b
-        
-        End If
+    x = UBound(Bounds)
     
-    End If
+    ReDim b(x)
+    
+    For i = 0& To x
+        b(i).lLowest = Bounds(i)(0)
+        b(i).lElements = Bounds(i)(1) - b(i).lLowest + 1&
+    Next i
+    
+    ArrCreate ArrayType, x + 1&, b
+    
+    Erase b
 
 ErrHandler:
 

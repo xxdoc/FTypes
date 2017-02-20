@@ -98,7 +98,7 @@ Public Function ToNumber(ByVal sVal As String) As String
             
             Next i
             
-            ToNumber = Left$(ToNumber, 308&)
+            ToNumber = ChrW$(48&) & Left$(ToNumber, 308&)
         
         End If
     

@@ -476,7 +476,7 @@ Public Function Split(Optional ByRef Delimeter As String, Optional ByVal Limit A
     
     If p_ValueLen > 0& And Len(Delimeter) > 0& Then
         
-        Split.Create ArrayType, 1&, Array(0&, p_ValueLen + L_NG)
+        Split.Create ArrayType, Array(0&, p_ValueLen + L_NG)
         
         s = Space$(p_ValueLen)
         p = StrPtr(s)
@@ -520,7 +520,7 @@ Public Function ToArray(Optional ByVal AsANSI As Boolean) As ArrayEx
         
         x = p_ValueLen * (((Not AsANSI) * L_NG) + 1&)
         
-        ToArray.Create vbByte, 1&, Array(0&, x + L_NG)
+        ToArray.Create vbByte, Array(0&, x + L_NG)
         
         If AsANSI Then RtlMoveMemory ByVal ToArray.Data, ByVal p_Value, x Else RtlMoveMemory ByVal ToArray.Data, ByVal p_ValuePtr, x
     
