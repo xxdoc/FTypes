@@ -205,7 +205,7 @@ Public Function Clone() As DateTimeEx
 
 End Function
 
-Public Function DateSerial(Year As Integer, Month As Integer, Day As Integer) As DateTimeEx
+Public Function DateSerial(ByVal Year As Integer, ByVal Month As Integer, ByVal Day As Integer) As DateTimeEx
     
     Set DateSerial = Me
     
@@ -256,7 +256,7 @@ Public Function Parse(ByRef Value As Variant) As DateTimeEx
 
 End Function
 
-Public Function TimeSerial(Hour As Integer, Minute As Integer, Second As Integer, Optional ByVal Millisecond As Integer) As DateTimeEx
+Public Function TimeSerial(ByVal Hour As Integer, ByVal Minute As Integer, ByVal Second As Integer, Optional ByVal Millisecond As Integer) As DateTimeEx
     
     Set TimeSerial = Me
     
