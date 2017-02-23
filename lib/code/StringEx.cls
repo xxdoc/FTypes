@@ -22,7 +22,9 @@ Private p_ValuePtr As Long
 
 'WINAPI
 
+Private Declare Function CharLowerBuffA Lib "user32" (ByVal sStr As String, ByVal lLength As Long) As Long
 Private Declare Function CharLowerBuffW Lib "user32" (ByVal lStr As Long, ByVal lLength As Long) As Long
+Private Declare Function CharUpperBuffA Lib "user32" (ByVal sStr As String, ByVal lLength As Long) As Long
 Private Declare Function CharUpperBuffW Lib "user32" (ByVal lStr As Long, ByVal lLength As Long) As Long
 Private Declare Function IsTextUnicode Lib "advapi32" (ByRef uBuffer As Any, ByVal lBufferLen As Long, ByRef lResult As Long) As Long
 Private Declare Function lstrlenW Lib "kernel32" (ByVal lString As Long) As Long
@@ -230,7 +232,11 @@ Public Function Lower() As StringEx
     
     Set Lower = Me
     
-    If p_ValueLen Then CharLowerBuffW p_ValuePtr, p_ValueLen
+    If p_ValueLen Then
+        
+        If PUB_UNICODE Then CharLowerBuffW p_ValuePtr, p_ValueLen Else CharLowerBuffA p_Value, p_ValueLen
+    
+    End If
 
 End Function
 
@@ -646,7 +652,11 @@ Public Function Upper() As StringEx
     
     Set Upper = Me
     
-    If p_ValueLen Then CharUpperBuffW p_ValuePtr, p_ValueLen
+    If p_ValueLen Then
+        
+        If PUB_UNICODE Then CharUpperBuffW p_ValuePtr, p_ValueLen Else CharUpperBuffA p_Value, p_ValueLen
+    
+    End If
 
 End Function
 

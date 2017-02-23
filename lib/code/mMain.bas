@@ -32,12 +32,16 @@ Public Const L_NG As Long = -1&
 
 'VARIABLES
 
+Public PUB_UNICODE As Boolean
 Public m_Comma As Byte
 Private m_Minus As Byte
 
 'WINAPI
 
+Private Declare Function GetDesktopWindow Lib "user32" () As Long
+Private Declare Function GetLocaleInfoA Lib "kernel32" (ByVal lLocale As Long, ByVal lType As Long, ByVal sBuffer As String, ByVal lBufferLen As Long) As Long
 Private Declare Function GetLocaleInfoW Lib "kernel32" (ByVal lLocale As Long, ByVal lType As Long, ByVal lBuffer As Long, ByVal lBufferLen As Long) As Long
+Private Declare Function IsWindowUnicode Lib "user32" (ByVal lhWnd As Long) As Long
 Private Declare Sub GetMem1 Lib "msvbvm60" (ByVal lSource As Long, bTarget As Byte)
 Private Declare Sub PutMem1 Lib "msvbvm60" (ByVal lTarget As Long, ByVal bSource As Byte)
 
@@ -53,8 +57,19 @@ Private Sub Main()
     s = Space$(1&)
     p = StrPtr(s)
     
-    If GetLocaleInfoW(1024&, 14&, p, 2&) Then m_Comma = AscB(s)
-    If GetLocaleInfoW(1024&, 81&, p, 2&) Then m_Minus = AscB(s)
+    PUB_UNICODE = IsWindowUnicode(GetDesktopWindow)
+    
+    If PUB_UNICODE Then
+        
+        If GetLocaleInfoW(1024&, 14&, p, 2&) Then m_Comma = AscB(s)
+        If GetLocaleInfoW(1024&, 81&, p, 2&) Then m_Minus = AscB(s)
+    
+    Else
+        
+        If GetLocaleInfoA(1024&, 14&, s, 2&) Then m_Comma = AscB(s)
+        If GetLocaleInfoA(1024&, 81&, s, 2&) Then m_Minus = AscB(s)
+    
+    End If
 
 End Sub
 
