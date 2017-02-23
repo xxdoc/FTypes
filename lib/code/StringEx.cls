@@ -636,7 +636,7 @@ Public Function TrimR() As StringEx
     
     If p_ValueLen Then
         
-        If AscW(Mid$(p_Value, p_ValueLen, 1&)) = 32 Then
+        If AscW(Strings.Mid$(p_Value, p_ValueLen, 1&)) = 32 Then
             
             Do
                 p_ValueLen = p_ValueLen + L_NG
