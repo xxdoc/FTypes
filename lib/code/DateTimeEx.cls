@@ -49,6 +49,12 @@ Public Property Get Hour() As Integer
 
 End Property
 
+Public Property Get IsLeap() As Boolean
+    
+    IsLeap = (DateTime.Month(DateTime.DateSerial(p_Value.iYear, 2, 29)) = 2)
+
+End Property
+
 Public Property Get Length() As Long
     
     Length = 16&

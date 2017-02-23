@@ -38,6 +38,16 @@ End Sub
 
 'PROPERTIES
 
+Public Property Get Asc(Optional ByVal Index As Long) As Long
+    
+    If p_ValueLen Then
+        
+        If Index > 0& And Index <= p_ValueLen Then Asc = AscW(Strings.Mid$(p_Value, Index, 1&)) Else Asc = AscW(p_Value)
+    
+    End If
+
+End Property
+
 Public Property Get Capacity() As Long
     
     Capacity = p_ValueLenReal
@@ -83,18 +93,6 @@ Public Property Let Value(ByRef NewValue As String)
 End Property
 
 'ROUTINES
-
-Public Function Asc(Optional ByVal Index As Long) As IntegerEx
-    
-    Set Asc = New IntegerEx
-    
-    If p_ValueLen Then
-        
-        If Index > 0& And Index <= p_ValueLen Then Asc.Value = AscW(Mid$(p_Value, Index, 1&)) Else Asc.Value = AscW(p_Value)
-    
-    End If
-
-End Function
 
 Public Function Clone() As StringEx
     
@@ -233,6 +231,20 @@ Public Function Lower() As StringEx
     Set Lower = Me
     
     If p_ValueLen Then CharLowerBuffW p_ValuePtr, p_ValueLen
+
+End Function
+
+Public Function Mid(ByVal Start As Long, Optional ByVal Length As Long) As StringEx
+    
+    Set Mid = Me
+    
+    If p_ValueLen > 0& And Start > 0& And Start <= p_ValueLen Then
+        
+        If Length > 0& And Length <= (p_ValueLen - Start) Then p_ValueLen = Length Else p_ValueLen = p_ValueLen - Start + 1&
+        
+        RtlMoveMemory ByVal p_ValuePtr, ByVal p_ValuePtr + ((Start + L_NG) * 2&), p_ValueLen * 2&
+    
+    End If
 
 End Function
 
