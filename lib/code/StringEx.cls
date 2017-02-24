@@ -630,6 +630,22 @@ Public Function TrimL() As StringEx
 
 End Function
 
+Public Function TrimNull() As StringEx
+    
+    Dim x As Long
+    
+    Set TrimNull = Me
+    
+    If p_ValueLen Then
+        
+        x = InStr(1&, p_Value, vbNullChar, vbBinaryCompare)
+        
+        If x > 0& And x <= p_ValueLen Then p_ValueLen = x + L_NG
+    
+    End If
+
+End Function
+
 Public Function TrimR() As StringEx
     
     Set TrimR = Me
