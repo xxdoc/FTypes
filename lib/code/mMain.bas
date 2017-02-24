@@ -73,13 +73,16 @@ Private Sub Main()
 
 End Sub
 
-Public Function ToNumber(ByVal sVal As String) As String
+Public Function ToNumber(ByVal sVal As String) As Double
     
     Dim b As Byte
+    Dim c As Long
     Dim i As Long
     Dim f As Boolean
+    Dim m As Boolean
     Dim p1 As Long
     Dim p2 As Long
+    Dim s As String
     
     i = Len(sVal)
     
@@ -91,21 +94,37 @@ Public Function ToNumber(ByVal sVal As String) As String
         
         Else
             
-            ToNumber = Space$(i)
+            s = Space$(i + 1&)
             p1 = StrPtr(sVal)
-            p2 = StrPtr(ToNumber)
+            p2 = StrPtr(s)
             
             For i = 1& To i
                 
                 GetMem1 p1, b
                 
-                If (b > 47 And b < 58) Or (Not f And b = m_Comma) Or (i = 1& And b = m_Minus) Then
+                If b > 47 And b < 58 Then
+                    
+                    PutMem1 p2, b
+                    
+                    c = c + 1&
+                    p2 = p2 + 2&
+                
+                ElseIf Not f And b = m_Comma Then
                     
                     PutMem1 p2, b
                     
                     p2 = p2 + 2&
                     
-                    If b = m_Comma Then f = True
+                    f = True
+                
+                ElseIf c = 0& And Not f And Not m And b = m_Minus Then
+                    
+                    PutMem1 p2, b
+                    PutMem1 p2 + 2&, 48
+                    
+                    p2 = p2 + 4&
+                    
+                    m = True
                 
                 End If
                 
@@ -113,12 +132,10 @@ Public Function ToNumber(ByVal sVal As String) As String
             
             Next i
             
-            ToNumber = ChrW$(48&) & Left$(ToNumber, 308&)
+            If f Or m Or c Then ToNumber = Left$(s, 308&)
         
         End If
     
-    Else
-        ToNumber = ChrW$(48&)
     End If
 
 End Function

@@ -256,9 +256,17 @@ End Function
 
 Public Function Numeric() As StringEx
     
+    Dim d As Double
+    
     Set Numeric = Me
     
-    If p_ValueLen Then Value = ToNumber(VBA.Left$(p_Value, p_ValueLen))
+    If p_ValueLen Then
+        
+        d = ToNumber(VBA.Left$(p_Value, p_ValueLen))
+        
+        If d Then Value = d Else p_ValueLen = 0&
+    
+    End If
 
 End Function
 
@@ -268,7 +276,7 @@ Public Function PadLeft(ByVal Width As Long) As StringEx
     
     Set PadLeft = Me
     
-    If p_ValueLen > 0& And Width > p_ValueLen Then
+    If Width > p_ValueLen Then
         
         x = Width - p_ValueLen
         
@@ -287,7 +295,7 @@ Public Function PadRight(ByVal Width As Long) As StringEx
     
     Set PadRight = Me
     
-    If p_ValueLen > 0& And Width > p_ValueLen Then
+    If Width > p_ValueLen Then
         
         x = Width - p_ValueLen
         
