@@ -192,6 +192,14 @@ Public Function ToInteger() As IntegerEx
 
 End Function
 
+Public Function ToSingle() As SingleEx
+    
+    Set ToSingle = New SingleEx
+    
+    ToSingle.Value = p_Value
+
+End Function
+
 Public Function ToString(Optional ByRef Format As String) As StringEx
     
     Set ToString = New StringEx

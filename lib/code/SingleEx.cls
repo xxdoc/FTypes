@@ -6,7 +6,7 @@ BEGIN
   DataSourceBehavior  = 0  'vbNone
   MTSTransactionMode  = 0  'NotAnMTSObject
 END
-Attribute VB_Name = "DoubleEx"
+Attribute VB_Name = "SingleEx"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
@@ -15,30 +15,30 @@ Option Explicit
 
 'CONSTANTS
 
-Private Const D_MN As Double = -1.79769313486231E+308
-Private Const D_MX As Double = 1.79769313486231E+308
+Private Const S_MN As Double = -3.4028235E+38
+Private Const S_MX As Double = 3.4028235E+38
 
 'VARIABLES
 
-Private p_Value As Double
+Private p_Value As Single
 
 'PROPERTIES
 
 Public Property Get Length() As Long
     
-    Length = 8&
+    Length = 4&
 
 End Property
 
-Public Property Get Max() As Double
+Public Property Get Max() As Single
     
-    Max = D_MX
+    Max = S_MX
 
 End Property
 
-Public Property Get Min() As Double
+Public Property Get Min() As Single
     
-    Min = D_MN
+    Min = S_MN
 
 End Property
 
@@ -48,7 +48,7 @@ Public Property Get Pointer() As Long
 
 End Property
 
-Public Property Get Value() As Double
+Public Property Get Value() As Single
 Attribute Value.VB_UserMemId = 0
 Attribute Value.VB_MemberFlags = "200"
     
@@ -56,7 +56,7 @@ Attribute Value.VB_MemberFlags = "200"
 
 End Property
 
-Public Property Let Value(ByVal NewValue As Double)
+Public Property Let Value(ByVal NewValue As Single)
     
     p_Value = NewValue
 
@@ -64,21 +64,21 @@ End Property
 
 'ROUTINES
 
-Public Function Clone() As DoubleEx
+Public Function Clone() As SingleEx
     
-    Set Clone = New DoubleEx
+    Set Clone = New SingleEx
     
     Clone.Value = p_Value
 
 End Function
 
-Public Function Parse(ByRef Value As Variant) As DoubleEx
+Public Function Parse(ByRef Value As Variant) As SingleEx
     
     Set Parse = Me
     
     Select Case VarType(Value)
         
-        Case vbInteger To vbDate, vbBoolean, vbByte, vbError
+        Case vbInteger To vbSingle, vbCurrency, vbDate, vbBoolean, vbByte, vbError
             
             p_Value = Value
         
@@ -86,14 +86,14 @@ Public Function Parse(ByRef Value As Variant) As DoubleEx
             
             p_Value = ToNumber(Value)
         
-        Case vbDecimal
+        Case vbDouble, vbDecimal
             
-            If Value > D_MN Then
+            If Value > S_MN Then
                 
-                If Value < D_MX Then p_Value = Value Else p_Value = D_MX
+                If Value < S_MX Then p_Value = Value Else p_Value = S_MX
             
             Else
-                p_Value = D_MN
+                p_Value = S_MN
             End If
          
          Case Else
@@ -104,7 +104,7 @@ Public Function Parse(ByRef Value As Variant) As DoubleEx
 
 End Function
 
-Public Function Round(ByVal DecimalDigits As Long) As DoubleEx
+Public Function Round(ByVal DecimalDigits As Long) As SingleEx
     
     On Error Resume Next
     
@@ -164,17 +164,15 @@ Public Function ToDecimal() As DecimalEx
     
     Set ToDecimal = New DecimalEx
     
-    With ToDecimal
-        
-        If p_Value > .Min Then
-            
-            If p_Value < .Max Then .Value = p_Value Else .Value = .Max
-        
-        Else
-            .Value = .Min
-        End If
+    ToDecimal.Value = p_Value
+
+End Function
+
+Public Function ToDouble() As DoubleEx
     
-    End With
+    Set ToDouble = New DoubleEx
+    
+    ToDouble.Value = p_Value
 
 End Function
 
@@ -201,24 +199,6 @@ Public Function ToLong() As LongEx
     Set ToLong = New LongEx
     
     With ToLong
-        
-        If p_Value > .Min Then
-            
-            If p_Value < .Max Then .Value = p_Value Else .Value = .Max
-        
-        Else
-            .Value = .Min
-        End If
-    
-    End With
-
-End Function
-
-Public Function ToSingle() As SingleEx
-    
-    Set ToSingle = New SingleEx
-    
-    With ToSingle
         
         If p_Value > .Min Then
             

@@ -225,6 +225,24 @@ Public Function ToLong() As LongEx
 
 End Function
 
+Public Function ToSingle() As SingleEx
+    
+    Set ToSingle = New SingleEx
+    
+    With ToSingle
+        
+        If p_Value > .Min Then
+            
+            If p_Value < .Max Then .Value = p_Value Else .Value = .Max
+        
+        Else
+            .Value = .Min
+        End If
+    
+    End With
+
+End Function
+
 Public Function ToString(Optional ByRef Format As String) As StringEx
     
     Set ToString = New StringEx
