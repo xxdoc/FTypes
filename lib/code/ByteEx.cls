@@ -93,7 +93,7 @@ Public Function Parse(ByRef Value As Variant) As ByteEx
         
         Case vbString
             
-            d = ToNumber(Value)
+            d = ToNumber(StrPtr(Value), Len(Value))
             
             If d > 0 Then
                 If d < B_MX Then p_Value = d Else p_Value = B_MX

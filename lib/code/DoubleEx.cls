@@ -84,14 +84,12 @@ Public Function Parse(ByRef Value As Variant) As DoubleEx
         
         Case vbString
             
-            p_Value = ToNumber(Value)
+            p_Value = ToNumber(StrPtr(Value), Len(Value))
         
         Case vbDecimal
             
             If Value > D_MN Then
-                
                 If Value < D_MX Then p_Value = Value Else p_Value = D_MX
-            
             Else
                 p_Value = D_MN
             End If

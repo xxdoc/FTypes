@@ -79,7 +79,7 @@ Public Function Parse(ByRef Value As Variant) As BooleanEx
         
         Case vbString
             
-            p_Value = ToNumber(Value)
+            If StrComp(Value, CStr(True), vbBinaryCompare) = 0 Then p_Value = True Else p_Value = ToNumber(StrPtr(Value), Len(Value))
         
         Case Else
             
@@ -109,7 +109,7 @@ Public Function ToByte() As ByteEx
     
     Set ToByte = New ByteEx
     
-    ToByte.Value = p_Value * L_NG
+    ToByte.Value = p_Value
 
 End Function
 

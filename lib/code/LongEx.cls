@@ -106,7 +106,7 @@ Public Function Parse(ByRef Value As Variant) As LongEx
         
         Case vbString
             
-            d = ToNumber(Value)
+            d = ToNumber(StrPtr(Value), Len(Value))
             
             If d > L_MN Then
                 If d < L_MX Then p_Value = d Else p_Value = L_MX

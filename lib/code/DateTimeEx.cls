@@ -139,6 +139,12 @@ Public Property Let Value(ByVal NewValue As Date)
 
 End Property
 
+Public Property Get Weekday() As Integer
+    
+    Weekday = p_Value.iDayOfWeek
+
+End Property
+
 Public Property Get Year() As Integer
     
     Year = p_Value.iYear

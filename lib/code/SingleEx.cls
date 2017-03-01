@@ -74,6 +74,8 @@ End Function
 
 Public Function Parse(ByRef Value As Variant) As SingleEx
     
+    Dim d As Double
+    
     Set Parse = Me
     
     Select Case VarType(Value)
@@ -84,14 +86,18 @@ Public Function Parse(ByRef Value As Variant) As SingleEx
         
         Case vbString
             
-            p_Value = ToNumber(Value)
+            d = ToNumber(StrPtr(Value), Len(Value))
+            
+            If d > S_MN Then
+                If d < S_MX Then p_Value = d Else p_Value = S_MX
+            Else
+                p_Value = S_MN
+            End If
         
         Case vbDouble, vbDecimal
             
             If Value > S_MN Then
-                
                 If Value < S_MX Then p_Value = Value Else p_Value = S_MX
-            
             Else
                 p_Value = S_MN
             End If

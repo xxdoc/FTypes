@@ -97,7 +97,7 @@ Public Function Parse(ByRef Value As Variant) As DecimalEx
         
         Case vbString
             
-            s = ToNumber(Value)
+            s = ToNumberStr(StrPtr(Value), Len(Value))
             
             p_Value = CDec(Left$(s, 29& + (InStr(1&, s, String$(1&, m_Comma), vbBinaryCompare) > 0&) * L_NG))
         

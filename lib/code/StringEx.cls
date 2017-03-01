@@ -256,17 +256,9 @@ End Function
 
 Public Function Numeric() As StringEx
     
-    Dim d As Double
-    
     Set Numeric = Me
     
-    If p_ValueLen Then
-        
-        d = ToNumber(VBA.Left$(p_Value, p_ValueLen))
-        
-        If d Then Value = d Else p_ValueLen = 0&
-    
-    End If
+    Value = ToNumber(p_ValuePtr, p_ValueLen)
 
 End Function
 
@@ -607,6 +599,14 @@ Public Function ToLong() As LongEx
     Set ToLong = New LongEx
     
     If p_ValueLen Then ToLong.Parse VBA.Left$(p_Value, p_ValueLen)
+
+End Function
+
+Public Function ToSingle() As SingleEx
+    
+    Set ToSingle = New SingleEx
+    
+    If p_ValueLen Then ToSingle.Parse VBA.Left$(p_Value, p_ValueLen)
 
 End Function
 

@@ -99,21 +99,17 @@ Public Function Parse(ByRef Value As Variant) As IntegerEx
         Case vbLong To vbDate, vbDecimal, vbError
             
             If Value > I_MN Then
-                
                 If Value < I_MX Then p_Value = Value Else p_Value = I_MX
-            
             Else
                 p_Value = I_MN
             End If
         
         Case vbString
             
-            d = ToNumber(Value)
+            d = ToNumber(StrPtr(Value), Len(Value))
             
             If d > I_MN Then
-                
                 If d < I_MX Then p_Value = d Else p_Value = I_MX
-            
             Else
                 p_Value = I_MN
             End If

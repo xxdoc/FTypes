@@ -94,7 +94,7 @@ Public Function Parse(ByRef Value As Variant) As CurrencyEx
         
         Case vbString
             
-            d = ToNumber(Value)
+            d = ToNumber(StrPtr(Value), Len(Value))
             
             If d > C_MN Then
                 If d < C_MX Then p_Value = d Else p_Value = C_MX
