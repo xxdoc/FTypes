@@ -95,17 +95,14 @@ Public Property Get Item(ParamArray Indexes()) As Variant
     On Error GoTo ErrHandler
     
     Dim b() As Long
-    Dim i As Long
     
     If p_Array.lPointer Then
         
+        RtlMoveMemory Item, p_Array.lVarType, 2&
+        
         If p_Array.iDims > 1 Then
             
-            ReDim b(UBound(Indexes))
-            
-            For i = 0& To UBound(b): b(i) = Indexes(i): Next i
-            
-            ArrElementGet VarPtr(b(0)), Item
+            ArrElementGet ArrVariantToIndexes(Indexes, b), Item
             
             Erase b
         
@@ -124,17 +121,12 @@ Public Property Let Item(ParamArray Indexes(), ByRef NewValue As Variant)
     On Error GoTo ErrHandler
     
     Dim b() As Long
-    Dim i As Long
     
     If p_Array.lPointer Then
         
         If p_Array.iDims > 1 Then
             
-            ReDim b(UBound(Indexes))
-            
-            For i = 0& To UBound(b): b(i) = Indexes(i): Next i
-            
-            ArrElementSet VarPtr(b(0)), NewValue
+            ArrElementSet ArrVariantToIndexes(Indexes, b), NewValue
             
             Erase b
         
@@ -359,6 +351,107 @@ Public Function Resize(ByVal NewUpperBound As Long) As ArrayEx
 
 End Function
 
+Public Function Sort(ByVal StartIndexes As Variant, Optional ByVal Descending As Boolean, Optional ByVal EndColumn As Long = 2147483647) As ArrayEx
+    
+    On Error GoTo ErrHandler
+    
+    Dim b() As Long
+    Dim e As Long
+    Dim i As Long
+    Dim j As Long
+    Dim p As Variant
+    Dim s As Long
+    Dim x As Long
+    Dim v1 As Variant
+    Dim v2 As Variant
+    Dim u As Long
+    
+    Set Sort = Me
+    
+    If p_Array.lPointer Then
+        
+        x = ArrVariantToIndexes(StartIndexes, b)
+        
+        u = UBound(b)
+        
+        s = b(u)
+        e = p_Array.uBounds(0).lLowest + p_Array.uBounds(0).lElements + L_NG
+        If EndColumn > s And EndColumn < e Then e = EndColumn
+        
+        b(u) = (s + e) \ 2&
+        
+        RtlMoveMemory p, p_Array.lVarType, 2&
+        
+        If ArrElementGet(x, p) = 0& Then
+            
+            RtlMoveMemory v1, p_Array.lVarType, 2&
+            RtlMoveMemory v2, p_Array.lVarType, 2&
+            
+            i = s
+            j = e
+            
+            While i <= j
+                
+                Do
+                    
+                    b(u) = i
+                    
+                    ArrElementGet x, v1
+                    
+                    If ((Descending = False And v1 < p) Or (Descending = True And v1 > p)) And i < e Then i = i + 1& Else Exit Do
+                
+                Loop
+                
+                Do
+                    
+                    b(u) = j
+                    
+                    ArrElementGet x, v2
+                    
+                    If ((Descending = False And p < v2) Or (Descending = True And p > v2)) And j > s Then j = j + L_NG Else Exit Do
+                
+                Loop
+                
+                If i <= j Then
+                    
+                    ArrElementSet x, v1
+                    b(u) = i
+                    ArrElementSet x, v2
+                    
+                    i = i + 1&
+                    j = j + L_NG
+                
+                End If
+            
+            Wend
+            
+            RtlMoveMemory v1, 0&, 4&
+            RtlMoveMemory v2, 0&, 4&
+            
+            x = p_Array.uBounds(0).lLowest
+            
+            If s < j Then
+                b(u) = s + x
+                Sort b, Descending, j + x
+            End If
+            
+            If i < e Then
+                b(u) = i + x
+                Sort b, Descending, e + x
+            End If
+        
+        End If
+        
+        RtlMoveMemory p, 0&, 4&
+        
+        Erase b
+    
+    End If
+
+ErrHandler:
+
+End Function
+
 Private Function ArrCreate(ByVal lType As VbVarType, ByVal lDims As Long, ByRef uBounds() As TSAFEARRAYBOUND) As Boolean
     
     Dim x As Long
@@ -385,17 +478,15 @@ Private Sub ArrDestroy()
 
 End Sub
 
-Private Sub ArrElementGet(ByVal Indexes As Long, ByRef Value As Variant)
-    
-    RtlMoveMemory Value, p_Array.lVarType, 2&
+Private Function ArrElementGet(ByVal Indexes As Long, ByRef Value As Variant) As Long
     
     Select Case p_Array.lVarType
-        Case vbDecimal: SafeArrayGetElement p_Array.lPointer, Indexes, ByVal VarPtr(Value)
-        Case vbVariant: SafeArrayGetElement p_Array.lPointer, Indexes, Value
-        Case Else: SafeArrayGetElement p_Array.lPointer, Indexes, ByVal VarPtr(Value) + 8&
+        Case vbDecimal: ArrElementGet = SafeArrayGetElement(p_Array.lPointer, Indexes, ByVal VarPtr(Value))
+        Case vbVariant: ArrElementGet = SafeArrayGetElement(p_Array.lPointer, Indexes, Value)
+        Case Else: ArrElementGet = SafeArrayGetElement(p_Array.lPointer, Indexes, ByVal VarPtr(Value) + 8&)
     End Select
 
-End Sub
+End Function
 
 Private Sub ArrElementSet(ByVal Indexes As Long, ByRef Value As Variant)
     
@@ -445,3 +536,20 @@ Private Sub ArrPtr(ByVal lArray As Long, ByRef uPtr As TSAFEARRAY, Optional ByVa
     End If
 
 End Sub
+
+Private Function ArrVariantToIndexes(ByVal SourceArray As Variant, ByRef OutputArray() As Long) As Long
+    
+    Dim i As Long
+    Dim u As Long
+    
+    u = UBound(SourceArray)
+    
+    ReDim OutputArray(u)
+    
+    For i = 0& To u
+        OutputArray(i) = SourceArray(i)
+    Next i
+    
+    ArrVariantToIndexes = VarPtr(OutputArray(0))
+
+End Function
