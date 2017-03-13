@@ -351,7 +351,7 @@ Public Function Resize(ByVal NewUpperBound As Long) As ArrayEx
 
 End Function
 
-Public Function Sort(ByVal StartIndexes As Variant, Optional ByVal Descending As Boolean, Optional ByVal EndColumn As Long = 2147483647) As ArrayEx
+Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As Boolean, Optional ByVal EndColumn As Long = 2147483647) As ArrayEx
     
     On Error GoTo ErrHandler
     
