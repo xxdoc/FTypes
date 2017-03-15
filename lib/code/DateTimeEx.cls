@@ -91,6 +91,12 @@ Public Property Get Month() As Integer
 
 End Property
 
+Public Property Get MonthDays() As Long
+    
+    MonthDays = DateTime.Day(DateTime.DateSerial(p_Value.iYear, p_Value.iMonth + 1, 1) + L_NG)
+
+End Property
+
 Public Property Get Pointer() As Long
     
     Pointer = VarPtr(p_Value)
@@ -148,6 +154,12 @@ End Property
 Public Property Get Year() As Integer
     
     Year = p_Value.iYear
+
+End Property
+
+Public Property Get YearDayIndex() As Long
+    
+    YearDayIndex = Abs(DateTime.DateDiff(ChrW$(100&), DateTime.DateSerial(p_Value.iYear, p_Value.iMonth, p_Value.iDay), DateSerial(p_Value.iYear + L_NG, 12, 31), vbUseSystemDayOfWeek, vbUseSystem))
 
 End Property
 

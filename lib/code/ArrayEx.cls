@@ -351,7 +351,7 @@ Public Function Resize(ByVal NewUpperBound As Long) As ArrayEx
 
 End Function
 
-Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As Boolean, Optional ByVal EndColumn As Long = 2147483647) As ArrayEx
+Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As Boolean, Optional ByVal EndColumn As Long = L_MX) As ArrayEx
     
     On Error GoTo ErrHandler
     
@@ -449,6 +449,42 @@ Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As
     End If
 
 ErrHandler:
+
+End Function
+
+Public Function ToString(ByRef StartIndexes As Variant, Optional ByRef Delimeter As String, Optional ByVal EndColumn As Long = L_MX) As StringEx
+    
+    Dim b() As Long
+    Dim i As Long
+    Dim x As Long
+    Dim u As Long
+    Dim v As Variant
+    
+    Set ToString = New StringEx
+    
+    If p_Array.lPointer Then
+        
+        x = ArrVariantToIndexes(StartIndexes, b)
+        u = UBound(b)
+        
+        i = p_Array.uBounds(0).lLowest + p_Array.uBounds(0).lElements + L_NG
+        If EndColumn > b(u) And EndColumn < i Then i = EndColumn
+        
+        RtlMoveMemory v, p_Array.lVarType, 2&
+        
+        For i = b(u) To i
+            
+            b(u) = i
+            
+            If ArrElementGet(x, v) = 0& Then ToString.Concat((v)).Concat Delimeter
+        
+        Next i
+        
+        RtlMoveMemory v, 0&, 4&
+        
+        Erase b
+    
+    End If
 
 End Function
 

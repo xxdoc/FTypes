@@ -28,6 +28,7 @@ End Type
 
 'CONSTANTS
 
+Public Const L_MX As Long = 2147483647
 Public Const L_NG As Long = -1&
 
 'VARIABLES

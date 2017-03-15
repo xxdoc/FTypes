@@ -16,7 +16,6 @@ Option Explicit
 'CONSTANTS
 
 Private Const L_MN As Long = &H80000000
-Private Const L_MX As Long = 2147483647
 
 'VARIABLES
 
