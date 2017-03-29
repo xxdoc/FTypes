@@ -208,7 +208,7 @@ Public Function Add(ByRef Item As Variant) As ArrayEx
         
         ArrElementSet VarPtr(0&), Item
     
-    ElseIf x = p_Array.lVarType Then
+    Else
         
         p_Array.uBounds(0).lElements = p_Array.uBounds(0).lElements + 1&
         
@@ -253,7 +253,7 @@ Public Function AddRange(ByRef Range As Variant) As ArrayEx
             
             For i = BoundL To BoundU: ArrElementSet VarPtr(i), Range(i): Next i
         
-        ElseIf a.lVarType = p_Array.lVarType Then
+        Else
             
             x = p_Array.iDims + L_NG
             
@@ -318,6 +318,64 @@ Public Function Destroy() As ArrayEx
     Set Destroy = Me
     
     ArrDestroy
+
+End Function
+
+Public Function Group() As ArrayEx
+    
+    Dim i As Long
+    Dim j As Long
+    Dim v1 As Variant
+    Dim v2 As Variant
+    Dim u As Long
+    Dim x As Long
+    
+    Set Group = Me
+    
+    If p_Array.lPointer > 0& And p_Array.iDims = 1& Then
+        
+        i = BoundL
+        x = i
+        
+        Sort Array(i)
+        
+        u = BoundU
+        
+        RtlMoveMemory v1, p_Array.lVarType, 2&
+        RtlMoveMemory v2, p_Array.lVarType, 2&
+        
+        Do
+            
+            ArrElementGet VarPtr(i), v1
+            
+            For j = i + 1& To u
+                
+                ArrElementGet VarPtr(j), v2
+                
+                If v1 <> v2 Then
+                    
+                    x = x + 1&
+                    
+                    ArrElementSet VarPtr(x), v2
+                    
+                    i = j
+                    
+                    Exit For
+                
+                End If
+            
+            Next j
+        
+        Loop While i < u
+        
+        RtlMoveMemory v1, 0&, 4&
+        RtlMoveMemory v2, 0&, 4&
+        
+        p_Array.uBounds(0&).lElements = x - p_Array.uBounds(0&).lLowest + 1&
+        
+        Resize x
+    
+    End If
 
 End Function
 
@@ -428,16 +486,14 @@ Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As
             RtlMoveMemory v1, 0&, 4&
             RtlMoveMemory v2, 0&, 4&
             
-            x = p_Array.uBounds(0).lLowest
-            
             If s < j Then
-                b(u) = s + x
-                Sort b, Descending, j + x
+                b(u) = s
+                Sort b, Descending, j
             End If
             
             If i < e Then
-                b(u) = i + x
-                Sort b, Descending, e + x
+                b(u) = i
+                Sort b, Descending, e
             End If
         
         End If
