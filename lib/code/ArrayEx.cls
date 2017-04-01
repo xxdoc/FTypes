@@ -198,13 +198,11 @@ Public Function Add(ByRef Item As Variant) As ArrayEx
     
     Set Add = Me
     
-    x = VarType(Item)
-    
     If p_Array.lPointer = 0& Then
         
         a(0).lElements = 1&
         
-        ArrCreate x, 1&, a
+        ArrCreate VarType(Item), 1&, a
         
         ArrElementSet VarPtr(0&), Item
     
@@ -321,7 +319,7 @@ Public Function Destroy() As ArrayEx
 
 End Function
 
-Public Function Group() As ArrayEx
+Public Function Distinct() As ArrayEx
     
     Dim i As Long
     Dim j As Long
@@ -330,7 +328,7 @@ Public Function Group() As ArrayEx
     Dim u As Long
     Dim x As Long
     
-    Set Group = Me
+    Set Distinct = Me
     
     If p_Array.lPointer > 0& And p_Array.iDims = 1& Then
         
@@ -350,6 +348,8 @@ Public Function Group() As ArrayEx
             
             For j = i + 1& To u
                 
+                i = j
+                
                 ArrElementGet VarPtr(j), v2
                 
                 If v1 <> v2 Then
@@ -357,8 +357,6 @@ Public Function Group() As ArrayEx
                     x = x + 1&
                     
                     ArrElementSet VarPtr(x), v2
-                    
-                    i = j
                     
                     Exit For
                 
