@@ -102,6 +102,22 @@ Public Function Parse(ByRef Value As Variant) As DoubleEx
 
 End Function
 
+Public Function Range(ByVal MinValue As Double, ByVal MaxValue As Double) As DoubleEx
+    
+    Set Range = Me
+    
+    If p_Value > MaxValue Then
+        
+        p_Value = MaxValue
+    
+    Else
+        
+        If p_Value < MinValue Then p_Value = MinValue
+    
+    End If
+
+End Function
+
 Public Function Round(ByVal DecimalDigits As Long) As DoubleEx
     
     On Error Resume Next

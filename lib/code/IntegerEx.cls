@@ -122,6 +122,22 @@ Public Function Parse(ByRef Value As Variant) As IntegerEx
 
 End Function
 
+Public Function Range(ByVal MinValue As Integer, ByVal MaxValue As Integer) As IntegerEx
+    
+    Set Range = Me
+    
+    If p_Value > MaxValue Then
+        
+        p_Value = MaxValue
+    
+    Else
+        
+        If p_Value < MinValue Then p_Value = MinValue
+    
+    End If
+
+End Function
+
 Public Function ToArray() As ArrayEx
     
     Set ToArray = New ArrayEx

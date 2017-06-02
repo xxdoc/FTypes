@@ -115,6 +115,22 @@ ErrHandler:
 
 End Function
 
+Public Function Range(ByRef MinValue As Variant, ByRef MaxValue As Variant) As DecimalEx
+    
+    Set Range = Me
+    
+    If p_Value > CDec(MaxValue) Then
+        
+        p_Value = CDec(MaxValue)
+    
+    Else
+        
+        If p_Value < CDec(MinValue) Then p_Value = CDec(MinValue)
+    
+    End If
+
+End Function
+
 Public Function Round(ByVal DecimalDigits As Long) As DecimalEx
     
     On Error Resume Next

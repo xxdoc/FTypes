@@ -109,6 +109,22 @@ Public Function Parse(ByRef Value As Variant) As ByteEx
 
 End Function
 
+Public Function Range(ByVal MinValue As Byte, ByVal MaxValue As Byte) As ByteEx
+    
+    Set Range = Me
+    
+    If p_Value > MaxValue Then
+        
+        p_Value = MaxValue
+    
+    Else
+        
+        If p_Value < MinValue Then p_Value = MinValue
+    
+    End If
+
+End Function
+
 Public Function ToArray() As ArrayEx
     
     Set ToArray = New ArrayEx

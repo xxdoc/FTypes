@@ -110,6 +110,22 @@ Public Function Parse(ByRef Value As Variant) As CurrencyEx
 
 End Function
 
+Public Function Range(ByVal MinValue As Currency, ByVal MaxValue As Currency) As CurrencyEx
+    
+    Set Range = Me
+    
+    If p_Value > MaxValue Then
+        
+        p_Value = MaxValue
+    
+    Else
+        
+        If p_Value < MinValue Then p_Value = MinValue
+    
+    End If
+
+End Function
+
 Public Function Round(ByVal DecimalDigits As Long) As CurrencyEx
     
     On Error Resume Next
