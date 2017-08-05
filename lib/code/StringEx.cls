@@ -13,8 +13,15 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+'CONSTANTS
+
+Private Const CONST_CRYPT_PROVIDER As String = "Microsoft Base Cryptographic Provider v1.0"
+
 'VARIABLES
 
+Private p_CryptContext As Long
+Private p_CryptHash As Long
+Private p_CryptKey As Long
 Private p_Value As String
 Private p_ValueLen As Long
 Private p_ValueLenReal As Long
@@ -26,6 +33,16 @@ Private Declare Function CharLowerBuffA Lib "user32" (ByVal sStr As String, ByVa
 Private Declare Function CharLowerBuffW Lib "user32" (ByVal lStr As Long, ByVal lLength As Long) As Long
 Private Declare Function CharUpperBuffA Lib "user32" (ByVal sStr As String, ByVal lLength As Long) As Long
 Private Declare Function CharUpperBuffW Lib "user32" (ByVal lStr As Long, ByVal lLength As Long) As Long
+Private Declare Function CryptAcquireContextA Lib "advapi32" (lProvider As Long, ByVal sContainer As String, ByVal sProvider As String, ByVal lType As Long, ByVal lFlags As Long) As Long
+Private Declare Function CryptAcquireContextW Lib "advapi32" (lProvider As Long, ByVal lContainer As Long, ByVal lProvider As Long, ByVal lType As Long, ByVal lFlags As Long) As Long
+Private Declare Function CryptCreateHash Lib "advapi32" (ByVal lProvider As Long, ByVal lAlgoritm As Long, ByVal lKey As Long, ByVal lFlags As Long, lHash As Long) As Long
+Private Declare Function CryptDecrypt Lib "advapi32" (ByVal lKey As Long, ByVal lHash As Long, ByVal lFinal As Long, ByVal lFlags As Long, uData As Any, lDataLen As Long) As Long
+Private Declare Function CryptDeriveKey Lib "advapi32" (ByVal lProvider As Long, ByVal lAlgoritm As Long, ByVal lData As Long, ByVal lFlags As Long, lKey As Long) As Long
+Private Declare Function CryptDestroyHash Lib "advapi32" (ByVal lHash As Long) As Long
+Private Declare Function CryptDestroyKey Lib "advapi32" (ByVal lKey As Long) As Long
+Private Declare Function CryptEncrypt Lib "advapi32" (ByVal lKey As Long, ByVal lHash As Long, ByVal lFinal As Long, ByVal lFlags As Long, uData As Any, lDataLen As Long, ByVal lBufLen As Long) As Long
+Private Declare Function CryptHashData Lib "advapi32" (ByVal lHash As Long, ByVal sData As String, ByVal lLen As Long, ByVal lFlags As Long) As Long
+Private Declare Function CryptReleaseContext Lib "advapi32" (ByVal lProvider As Long, ByVal lFlags As Long) As Long
 Private Declare Function IsTextUnicode Lib "advapi32" (ByRef uBuffer As Any, ByVal lBufferLen As Long, ByRef lResult As Long) As Long
 Private Declare Function lstrlenW Lib "kernel32" (ByVal lString As Long) As Long
 Private Declare Function MultiByteToWideChar Lib "kernel32" (ByVal lCodePage As Long, ByVal lFlags As Long, uMultiByte As Any, ByVal lMultiByteLen As Long, uWideCharStr As Any, ByVal lWideCharStrLen As Long) As Long
@@ -35,6 +52,12 @@ Private Declare Function MultiByteToWideChar Lib "kernel32" (ByVal lCodePage As 
 Private Sub Class_Initialize()
     
     p_ValueLenReal = 256&
+
+End Sub
+
+Private Sub Class_Terminate()
+    
+    CryptDestroy
 
 End Sub
 
@@ -152,6 +175,14 @@ Public Function ConcatPointer(ByVal ConcatStringPointer As Long) As StringEx
 
 End Function
 
+Public Function Decrypt() As StringEx
+    
+    Set Decrypt = Me
+    
+    If CryptCreate And p_ValueLen Then CryptDecrypt p_CryptKey, 0&, 1&, 0&, ByVal p_ValuePtr, p_ValueLenReal * 2&
+
+End Function
+
 Public Function Duplicate(ByVal Count As Long) As StringEx
     
     Dim i As Long
@@ -170,6 +201,14 @@ Public Function Duplicate(ByVal Count As Long) As StringEx
         Next i
     
     End If
+
+End Function
+
+Public Function Encrypt() As StringEx
+    
+    Set Encrypt = Me
+    
+    If CryptCreate And p_ValueLen Then CryptEncrypt p_CryptKey, 0&, 1&, 0&, ByVal p_ValuePtr, p_ValueLen * 2&, p_ValueLenReal * 2&
 
 End Function
 
@@ -713,6 +752,52 @@ Private Sub BufferRedim(ByVal NewStringLen As Long, ByVal FromScratch As Boolean
             If x Then RtlMoveMemory ByVal p_ValuePtr, ByVal StrPtr(b), x * 2&
         
         End If
+    
+    End If
+
+End Sub
+
+Private Function CryptCreate() As Boolean
+    
+    If p_CryptContext Then
+        
+        CryptCreate = True
+    
+    Else
+        
+        If PUB_UNICODE Then
+            If CryptAcquireContextW(p_CryptContext, StrPtr(App.Title), StrPtr(CONST_CRYPT_PROVIDER), 1&, 8&) = 0& Then CryptAcquireContextW p_CryptContext, StrPtr(App.Title), StrPtr(CONST_CRYPT_PROVIDER), 1&, 0&
+        Else
+            If CryptAcquireContextA(p_CryptContext, App.Title, CONST_CRYPT_PROVIDER, 1&, 8&) Then CryptAcquireContextA p_CryptContext, App.Title, CONST_CRYPT_PROVIDER, 1&, 0&
+        End If
+        
+        If p_CryptContext Then
+            
+            If CryptCreateHash(p_CryptContext, 32771, 0&, 0&, p_CryptHash) Then 'ALG_CLASS_HASH + ALG_SID_MD5
+                
+                If CryptHashData(p_CryptHash, App.Title, 6&, 0&) Then
+                    
+                    If CryptDeriveKey(p_CryptContext, 26625&, p_CryptHash, 0&, p_CryptKey) Then CryptCreate = True 'ALG_CLASS_DATA_ENCRYPT + ALG_TYPE_STREAM + ALG_SID_RC4
+                
+                End If
+            
+            End If
+        
+        End If
+    
+    End If
+
+End Function
+
+Private Sub CryptDestroy()
+    
+    If p_CryptContext Then
+        
+        If p_CryptKey Then CryptDestroyKey p_CryptKey
+        
+        If p_CryptHash Then CryptDestroyHash p_CryptHash
+        
+        CryptReleaseContext p_CryptContext, 0&
     
     End If
 
