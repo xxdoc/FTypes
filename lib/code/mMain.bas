@@ -124,11 +124,21 @@ Public Function ToNumber(ByVal lPointer As Long, ByVal lLength As Long) As Strin
         Next i
         
         If c > 308& Then
+            
             ToNumber = Left$(ToNumber, 308&)
+        
+        ElseIf c = 1& Then
+            
+            If AscW(ToNumber) = m_Comma Or AscW(ToNumber) = m_Minus Then ToNumber = ChrW$(48&)
+        
         ElseIf c > 0& Then
+            
             ToNumber = Left$(ToNumber, c)
+        
         Else
+            
             ToNumber = ChrW$(48&)
+        
         End If
     
     Else
