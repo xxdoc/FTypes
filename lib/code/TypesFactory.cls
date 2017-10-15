@@ -77,6 +77,14 @@ Public Function NewInteger(ByRef Value As Variant) As IntegerEx
 
 End Function
 
+Public Function NewList(ByRef Value As Variant) As ListEx
+    
+    Set NewList = New ListEx
+    
+    NewList.Value = Value
+
+End Function
+
 Public Function NewLong(ByRef Value As Variant) As LongEx
     
     Set NewLong = New LongEx

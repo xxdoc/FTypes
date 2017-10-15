@@ -146,6 +146,14 @@ Private Function IFTypesArray_Add(Item As Variant) As IFTypesArray
 
 End Function
 
+Private Function IFTypesArray_Destroy() As IFTypesArray
+    
+    Set IFTypesArray_Destroy = Me
+    
+    ArrayDestroy p_Array
+
+End Function
+
 Private Function IFTypesArray_Parse(Value As Variant) As IFTypesArray
     
     Dim b(0) As TSAFEARRAYBOUND
@@ -237,6 +245,12 @@ Public Function Create(ByVal ArrayType As VbVarType, ByVal Elements As Long) As 
     End If
 
 ErrHandler:
+
+End Function
+
+Public Function Destroy() As ArrayEx
+    
+    Set Destroy = IFTypesArray_Destroy
 
 End Function
 

@@ -33,6 +33,10 @@ Public Function Add(ByRef Item As Variant) As IFTypesArray
     '
 End Function
 
+Public Function Destroy() As IFTypesArray
+    '
+End Function
+
 Public Function Parse(ByRef Value As Variant) As IFTypesArray
     '
 End Function
