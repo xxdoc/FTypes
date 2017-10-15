@@ -13,6 +13,10 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+'INTERFACES
+
+Implements IFTypesBasic
+
 'CONSTANTS
 
 Private Const C_MN As Currency = -922337203685477.5807@
@@ -24,9 +28,21 @@ Private p_Value As Currency
 
 'PROPERTIES
 
+Private Property Get IFTypesBasic_Length() As Long
+    
+    IFTypesBasic_Length = 8&
+
+End Property
+
+Private Property Get IFTypesBasic_Pointer() As Long
+    
+    IFTypesBasic_Pointer = VarPtr(p_Value)
+
+End Property
+
 Public Property Get Length() As Long
     
-    Length = 8&
+    Length = IFTypesBasic_Length
 
 End Property
 
@@ -44,7 +60,7 @@ End Property
 
 Public Property Get Pointer() As Long
     
-    Pointer = VarPtr(p_Value)
+    Pointer = IFTypesBasic_Pointer
 
 End Property
 
@@ -62,21 +78,13 @@ Public Property Let Value(ByVal NewValue As Currency)
 
 End Property
 
-'ROUTINES
+'METHODS
 
-Public Function Clone() As CurrencyEx
-    
-    Set Clone = New CurrencyEx
-    
-    Clone.Value = p_Value
-
-End Function
-
-Public Function Parse(ByRef Value As Variant) As CurrencyEx
+Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
     
     Dim d As Double
     
-    Set Parse = Me
+    Set IFTypesBasic_Parse = Me
     
     Select Case VarType(Value)
         
@@ -110,6 +118,28 @@ Public Function Parse(ByRef Value As Variant) As CurrencyEx
 
 End Function
 
+Private Function IFTypesBasic_ToList() As IFTypesArray
+    
+    Set IFTypesBasic_ToList = New ListEx
+    
+    IFTypesBasic_ToList.Parse p_Value
+
+End Function
+
+Public Function Clone() As CurrencyEx
+    
+    Set Clone = New CurrencyEx
+    
+    Clone.Value = p_Value
+
+End Function
+
+Public Function Parse(ByRef Value As Variant) As CurrencyEx
+    
+    Set Parse = IFTypesBasic_Parse(Value)
+
+End Function
+
 Public Function Range(ByVal MinValue As Currency, ByVal MaxValue As Currency) As CurrencyEx
     
     Set Range = Me
@@ -133,14 +163,6 @@ Public Function Round(ByVal DecimalDigits As Long) As CurrencyEx
     Set Round = Me
     
     p_Value = Math.Round(p_Value, DecimalDigits)
-
-End Function
-
-Public Function ToArray() As ArrayEx
-    
-    Set ToArray = New ArrayEx
-    
-    ToArray.Parse p_Value
 
 End Function
 
@@ -195,6 +217,12 @@ Public Function ToInteger() As IntegerEx
         End If
     
     End With
+
+End Function
+
+Public Function ToList() As ListEx
+    
+    Set ToList = IFTypesBasic_ToList
 
 End Function
 

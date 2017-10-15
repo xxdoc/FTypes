@@ -13,15 +13,31 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+'INTERFACES
+
+Implements IFTypesBasic
+
 'VARIABLES
 
 Private p_Value As Boolean
 
 'PROPERTIES
 
+Private Property Get IFTypesBasic_Length() As Long
+    
+    IFTypesBasic_Length = 2&
+
+End Property
+
+Private Property Get IFTypesBasic_Pointer() As Long
+    
+    IFTypesBasic_Pointer = VarPtr(p_Value)
+
+End Property
+
 Public Property Get Length() As Long
     
-    Length = 2&
+    Length = IFTypesBasic_Length
 
 End Property
 
@@ -39,7 +55,7 @@ End Property
 
 Public Property Get Pointer() As Long
     
-    Pointer = VarPtr(p_Value)
+    Pointer = IFTypesBasic_Pointer
 
 End Property
 
@@ -57,19 +73,11 @@ Public Property Let Value(ByVal NewValue As Boolean)
 
 End Property
 
-'ROUTINES
+'METHODS
 
-Public Function Clone() As BooleanEx
+Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
     
-    Set Clone = New BooleanEx
-    
-    Clone.Value = p_Value
-
-End Function
-
-Public Function Parse(ByRef Value As Variant) As BooleanEx
-    
-    Set Parse = Me
+    Set IFTypesBasic_Parse = Me
     
     Select Case VarType(Value)
         
@@ -89,19 +97,33 @@ Public Function Parse(ByRef Value As Variant) As BooleanEx
 
 End Function
 
+Private Function IFTypesBasic_ToList() As IFTypesArray
+    
+    Set IFTypesBasic_ToList = New ListEx
+    
+    IFTypesBasic_ToList.Parse p_Value
+
+End Function
+
+Public Function Clone() As BooleanEx
+    
+    Set Clone = New BooleanEx
+    
+    Clone.Value = p_Value
+
+End Function
+
+Public Function Parse(ByRef Value As Variant) As BooleanEx
+    
+    Set Parse = IFTypesBasic_Parse(Value)
+
+End Function
+
 Public Function Reverse() As BooleanEx
     
     Set Reverse = Me
     
     p_Value = Not p_Value
-
-End Function
-
-Public Function ToArray() As ArrayEx
-    
-    Set ToArray = New ArrayEx
-    
-    ToArray.Parse p_Value
 
 End Function
 
@@ -142,6 +164,12 @@ Public Function ToInteger() As IntegerEx
     Set ToInteger = New IntegerEx
     
     ToInteger.Value = p_Value
+
+End Function
+
+Public Function ToList() As ListEx
+    
+    Set ToList = IFTypesBasic_ToList
 
 End Function
 

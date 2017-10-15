@@ -13,6 +13,10 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+'INTERFACES
+
+Implements IFTypesBasic
+
 'CONSTANTS
 
 Private Const L_MN As Long = &H80000000
@@ -23,9 +27,21 @@ Private p_Value As Long
 
 'PROPERTIES
 
+Private Property Get IFTypesBasic_Length() As Long
+    
+    IFTypesBasic_Length = 4&
+
+End Property
+
+Private Property Get IFTypesBasic_Pointer() As Long
+    
+    IFTypesBasic_Pointer = VarPtr(p_Value)
+
+End Property
+
 Public Property Get Length() As Long
     
-    Length = 4&
+    Length = IFTypesBasic_Length
 
 End Property
 
@@ -43,7 +59,7 @@ End Property
 
 Public Property Get Pointer() As Long
     
-    Pointer = VarPtr(p_Value)
+    Pointer = IFTypesBasic_Pointer
 
 End Property
 
@@ -73,21 +89,13 @@ Public Property Get WordLow() As Integer
 
 End Property
 
-'ROUTINES
+'METHODS
 
-Public Function Clone() As LongEx
-    
-    Set Clone = New LongEx
-    
-    Clone.Value = p_Value
-
-End Function
-
-Public Function Parse(ByRef Value As Variant) As LongEx
+Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
     
     Dim d As Double
     
-    Set Parse = Me
+    Set IFTypesBasic_Parse = Me
     
     Select Case VarType(Value)
         
@@ -121,6 +129,28 @@ Public Function Parse(ByRef Value As Variant) As LongEx
 
 End Function
 
+Private Function IFTypesBasic_ToList() As IFTypesArray
+    
+    Set IFTypesBasic_ToList = New ListEx
+    
+    IFTypesBasic_ToList.Parse p_Value
+
+End Function
+
+Public Function Clone() As LongEx
+    
+    Set Clone = New LongEx
+    
+    Clone.Value = p_Value
+
+End Function
+
+Public Function Parse(ByRef Value As Variant) As LongEx
+    
+    Set Parse = IFTypesBasic_Parse(Value)
+
+End Function
+
 Public Function Range(ByVal MinValue As Long, ByVal MaxValue As Long) As LongEx
     
     Set Range = Me
@@ -134,14 +164,6 @@ Public Function Range(ByVal MinValue As Long, ByVal MaxValue As Long) As LongEx
         If p_Value < MinValue Then p_Value = MinValue
     
     End If
-
-End Function
-
-Public Function ToArray() As ArrayEx
-    
-    Set ToArray = New ArrayEx
-    
-    ToArray.Parse p_Value
 
 End Function
 
@@ -204,6 +226,12 @@ Public Function ToInteger() As IntegerEx
         End If
     
     End With
+
+End Function
+
+Public Function ToList() As ListEx
+    
+    Set ToList = IFTypesBasic_ToList
 
 End Function
 

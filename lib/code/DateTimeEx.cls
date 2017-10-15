@@ -13,6 +13,10 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = True
 Option Explicit
 
+'INTERFACES
+
+Implements IFTypesBasic
+
 'TYPES
 
 Private Type TSYSTEMTIME
@@ -37,6 +41,18 @@ Private Declare Sub GetSystemTime Lib "kernel32" (uSystemTime As TSYSTEMTIME)
 
 'PROPERTIES
 
+Private Property Get IFTypesBasic_Length() As Long
+    
+    IFTypesBasic_Length = 16&
+
+End Property
+
+Private Property Get IFTypesBasic_Pointer() As Long
+    
+    IFTypesBasic_Pointer = VarPtr(p_Value)
+
+End Property
+
 Public Property Get Day() As Integer
     
     Day = p_Value.iDay
@@ -57,7 +73,7 @@ End Property
 
 Public Property Get Length() As Long
     
-    Length = 16&
+    Length = IFTypesBasic_Length
 
 End Property
 
@@ -99,7 +115,7 @@ End Property
 
 Public Property Get Pointer() As Long
     
-    Pointer = VarPtr(p_Value)
+    Pointer = IFTypesBasic_Pointer
 
 End Property
 
@@ -163,7 +179,46 @@ Public Property Get YearDayIndex() As Long
 
 End Property
 
-'ROUTINES
+'METHODS
+
+Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
+    
+    Set IFTypesBasic_Parse = Me
+    
+    Select Case VarType(Value)
+        
+        Case vbInteger To vbDate, vbBoolean, vbByte, vbDecimal
+            
+            Me.Value = Value
+        
+        Case vbString
+            
+            If IsDate(Value) Then Me.Value = Value
+        
+        Case Else
+            
+            With p_Value
+                .iDay = 0
+                .iDayOfWeek = 0
+                .iHour = 0
+                .iMilliseconds = 0
+                .iMinute = 0
+                .iMonth = 0
+                .iSecond = 0
+                .iYear = 0
+            End With
+    
+    End Select
+
+End Function
+
+Private Function IFTypesBasic_ToList() As IFTypesArray
+    
+    Set IFTypesBasic_ToList = New ListEx
+    
+    IFTypesBasic_ToList.Parse Me.Value
+
+End Function
 
 Public Function AddDays(ByVal Count As Integer) As DateTimeEx
     
@@ -251,32 +306,7 @@ End Function
 
 Public Function Parse(ByRef Value As Variant) As DateTimeEx
     
-    Set Parse = Me
-    
-    Select Case VarType(Value)
-        
-        Case vbInteger To vbDate, vbBoolean, vbByte, vbDecimal
-            
-            Me.Value = Value
-        
-        Case vbString
-            
-            If IsDate(Value) Then Me.Value = Value
-        
-        Case Else
-            
-            With p_Value
-                .iDay = 0
-                .iDayOfWeek = 0
-                .iHour = 0
-                .iMilliseconds = 0
-                .iMinute = 0
-                .iMonth = 0
-                .iSecond = 0
-                .iYear = 0
-            End With
-    
-    End Select
+    Set Parse = IFTypesBasic_Parse(Value)
 
 End Function
 
@@ -290,6 +320,12 @@ Public Function TimeSerial(ByVal Hour As Integer, ByVal Minute As Integer, ByVal
         .iSecond = Second
         .iMilliseconds = Millisecond
     End With
+
+End Function
+
+Public Function ToList() As ListEx
+    
+    Set ToList = IFTypesBasic_ToList
 
 End Function
 
