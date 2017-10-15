@@ -6,7 +6,7 @@ BEGIN
   DataSourceBehavior  = 0  'vbNone
   MTSTransactionMode  = 0  'NotAnMTSObject
 END
-Attribute VB_Name = "ArrayEx"
+Attribute VB_Name = "ListEx"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = True
 Attribute VB_PredeclaredId = False
@@ -49,27 +49,9 @@ Private Property Get IFTypesArray_Pointer() As Long
 
 End Property
 
-Public Property Get BoundL(Optional ByVal Dimension As Long) As Long
+Public Property Get Count() As Long
     
-    If p_Array.lPointer Then
-        
-        If Dimension > 0& And Dimension <= p_Array.iDims Then BoundL = p_Array.uBounds(p_Array.iDims - Dimension).lLowest Else BoundL = p_Array.uBounds(p_Array.iDims + L_NG).lLowest
-    
-    End If
-
-End Property
-
-Public Property Get BoundU(Optional ByVal Dimension As Long) As Long
-    
-    Dim x As Long
-    
-    If p_Array.lPointer Then
-        
-        If Dimension > 0& And Dimension <= p_Array.iDims Then x = p_Array.iDims - Dimension Else x = p_Array.iDims + L_NG
-        
-        BoundU = p_Array.uBounds(x).lLowest + p_Array.uBounds(x).lElements + L_NG
-    
-    End If
+    If p_Array.lPointer Then Count = p_Array.uBounds(0).lElements
 
 End Property
 
@@ -79,75 +61,27 @@ Public Property Get Data() As Long
 
 End Property
 
-Public Property Get Dimensions() As Long
-    
-    Dimensions = p_Array.iDims
-
-End Property
-
-Public Property Get Elements(Optional ByVal Dimension As Long) As Long
-    
-    If p_Array.lPointer Then
-        
-        If Dimension > 1& And Dimension <= p_Array.iDims Then Elements = p_Array.uBounds(p_Array.iDims - Dimension).lElements Else Elements = p_Array.uBounds(p_Array.iDims + L_NG).lElements
-    
-    End If
-
-End Property
-
 Public Property Get ElementSize() As Long
     
     ElementSize = IFTypesArray_ElementSize
 
 End Property
 
-Public Property Get Item(ParamArray Indexes()) As Variant
+Public Property Get Item(ByVal Index As Long) As Variant
     
-    On Error GoTo ErrHandler
-    
-    Dim b() As Long
-    
-    If p_Array.lPointer Then
+    If Index >= 0& And Index <= Count Then
         
         VariantSetType Item, p_Array.lVarType
         
-        If p_Array.iDims > 1 Then
-            
-            ArrayElementGet p_Array, ArrVariantToIndexes(Indexes, b), Item
-            
-            Erase b
-        
-        Else
-            ArrayElementGet p_Array, VarPtr(CLng(Indexes(0))), Item
-        End If
+        ArrayElementGet p_Array, VarPtr(Index), Item
     
     End If
-
-ErrHandler:
 
 End Property
 
-Public Property Let Item(ParamArray Indexes(), ByRef NewValue As Variant)
+Public Property Let Item(ByVal Index As Long, ByRef NewValue As Variant)
     
-    On Error GoTo ErrHandler
-    
-    Dim b() As Long
-    
-    If p_Array.lPointer Then
-        
-        If p_Array.iDims > 1 Then
-            
-            ArrayElementSet p_Array, ArrVariantToIndexes(Indexes, b), NewValue
-            
-            Erase b
-        
-        Else
-            ArrayElementSet p_Array, VarPtr(CLng(Indexes(0))), NewValue
-        End If
-    
-    End If
-
-ErrHandler:
+    If Index >= 0& And Index <= Count Then ArrayElementSet p_Array, VarPtr(Index), NewValue
 
 End Property
 
@@ -174,20 +108,15 @@ End Property
 Public Property Let Value(ByRef NewValue As Variant)
     
     Dim a As TSAFEARRAY
-    Dim b() As TSAFEARRAYBOUND
-    Dim i As Long
+    Dim b(0) As TSAFEARRAYBOUND
     
     ArrayPtr a, VarPtr(NewValue) * (((VarType(NewValue) And vbArray) = vbArray) * L_NG), True
     
-    If a.lPointer Then
+    If a.lPointer > 0& And a.iDims = 1 Then
         
-        ReDim b(a.iDims + L_NG)
-        
-        For i = 0& To a.iDims + L_NG: b(a.iDims - i + L_NG) = a.uBounds(i): Next i
+        b(0).lElements = a.uBounds(0).lElements
         
         If ArrayCreate(p_Array, a.lVarType, a.iDims, b) Then ArrayCopy p_Array, a.lPointer
-        
-        Erase b
     
     End If
 
@@ -197,39 +126,23 @@ End Property
 
 Private Function IFTypesArray_Add(Item As Variant) As IFTypesArray
     
-    Dim a(0) As TSAFEARRAYBOUND
-    Dim b() As Long
-    Dim x As Long
+    Dim b(0) As TSAFEARRAYBOUND
     
     Set IFTypesArray_Add = Me
     
     If p_Array.lPointer Then
         
         ArrayRedim p_Array, p_Array.uBounds(0).lElements + 1&
-        
-        If p_Array.iDims > 1& Then
-            
-            x = p_Array.iDims + L_NG
-            
-            ReDim b(x)
-            
-            For x = 0& To x: b(x) = BoundU(x + 1&): Next x
-            
-            ArrayElementSet p_Array, VarPtr(b(0)), Item
-            
-            Erase b
-        
-        Else
-            ArrayElementSet p_Array, VarPtr(BoundU), Item
-        End If
     
     Else
         
-        a(0).lElements = 1&
+        b(0).lElements = 1&
         
-        If ArrayCreate(p_Array, VarType(Item), 1&, a) Then ArrayElementSet p_Array, VarPtr(0&), Item
+        ArrayCreate p_Array, VarType(Item), 1&, b
     
     End If
+    
+    ArrayElementSet p_Array, VarPtr(Count + L_NG), Item
 
 End Function
 
@@ -251,22 +164,21 @@ Private Function IFTypesArray_Resize(ByVal NewUpperBound As Long) As IFTypesArra
     
     If p_Array.lPointer Then
         
-        If NewUpperBound >= p_Array.uBounds(0&).lLowest Then ArrayRedim p_Array, NewUpperBound - p_Array.uBounds(0&).lLowest + 1&
+        If NewUpperBound >= 0& And NewUpperBound < p_Array.uBounds(0&).lElements Then ArrayRedim p_Array, NewUpperBound + 1&
     
     End If
 
 End Function
 
-Public Function Add(ByRef Item As Variant) As ArrayEx
+Public Function Add(ByRef Item As Variant) As ListEx
     
     Set Add = IFTypesArray_Add(Item)
 
 End Function
 
-Public Function AddRange(ByRef Range As Variant) As ArrayEx
+Public Function AddRange(ByRef Range As Variant) As ListEx
     
     Dim a As TSAFEARRAY
-    Dim b() As Long
     Dim i As Long
     Dim x As Long
     
@@ -276,22 +188,19 @@ Public Function AddRange(ByRef Range As Variant) As ArrayEx
         
         ArrayPtr a, VarPtr(Range) * (((VarType(Range) And vbArray) = vbArray) * L_NG), True
         
-        If a.lPointer <> 0& And a.iDims = 1& Then
+        If a.lPointer > 0& And a.iDims = 1& Then
             
-            x = p_Array.iDims + L_NG
+            x = p_Array.uBounds(0).lElements
             
-            ReDim b(x)
-            
-            For i = 0& To x: b(i) = BoundU(i + 1&): Next i
-            
-            ArrayRedim p_Array, p_Array.uBounds(0).lElements + a.uBounds(0).lElements
+            ArrayRedim p_Array, x + a.uBounds(0).lElements
             
             For i = a.uBounds(0).lLowest To a.uBounds(0).lLowest + a.uBounds(0).lElements + L_NG
-                b(x) = b(x) + 1&
-                ArrayElementSet p_Array, VarPtr(b(0)), Range(i)
-            Next i
+                
+                x = x + 1&
+                
+                ArrayElementSet p_Array, VarPtr(x + L_NG), Range(i)
             
-            Erase b
+            Next i
         
         End If
     
@@ -303,42 +212,35 @@ Public Function AddRange(ByRef Range As Variant) As ArrayEx
 
 End Function
 
-Public Function Clone() As ArrayEx
+Public Function Clone() As ListEx
     
-    Set Clone = New ArrayEx
+    Set Clone = New ListEx
     
     If p_Array.lPointer Then Clone.Value = Value
 
 End Function
 
-Public Function Create(ByVal ArrayType As VbVarType, ParamArray Bounds()) As ArrayEx
+Public Function Create(ByVal ArrayType As VbVarType, ByVal Elements As Long) As ListEx
     
     On Error GoTo ErrHandler
     
-    Dim b() As TSAFEARRAYBOUND
-    Dim i As Long
-    Dim x As Long
+    Dim b(0) As TSAFEARRAYBOUND
     
     Set Create = Me
     
-    x = UBound(Bounds)
+    If Elements > 0& Then
+        
+        b(0).lElements = Elements
+        
+        ArrayCreate p_Array, ArrayType, 1&, b
     
-    ReDim b(x)
-    
-    For i = 0& To x
-        b(i).lLowest = Bounds(i)(0)
-        b(i).lElements = Bounds(i)(1) - b(i).lLowest + 1&
-    Next i
-    
-    ArrayCreate p_Array, ArrayType, x + 1&, b
-    
-    Erase b
+    End If
 
 ErrHandler:
 
 End Function
 
-Public Function Distinct() As ArrayEx
+Public Function Distinct() As ListEx
     
     Dim i As Long
     Dim j As Long
@@ -349,14 +251,11 @@ Public Function Distinct() As ArrayEx
     
     Set Distinct = Me
     
-    If p_Array.lPointer > 0& And p_Array.iDims = 1& Then
+    If p_Array.lPointer Then
         
-        i = BoundL
-        x = i
+        Sort
         
-        Sort Array(i)
-        
-        u = BoundU
+        u = Count + L_NG
         
         VariantSetType v1, p_Array.lVarType
         VariantSetType v2, p_Array.lVarType
@@ -388,31 +287,28 @@ Public Function Distinct() As ArrayEx
         VariantZero v1
         VariantZero v2
         
-        p_Array.uBounds(0&).lElements = x - p_Array.uBounds(0&).lLowest + 1&
-        
         Resize x
     
     End If
 
 End Function
 
-Public Function Parse(ByRef Value As Variant) As ArrayEx
+Public Function Parse(ByRef Value As Variant) As ListEx
     
     Set Parse = IFTypesArray_Parse(Value)
 
 End Function
 
-Public Function Resize(ByVal NewUpperBound As Long) As ArrayEx
+Public Function Resize(ByVal NewUpperBound As Long) As ListEx
     
     Set Resize = IFTypesArray_Resize(NewUpperBound)
 
 End Function
 
-Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As Boolean, Optional ByVal EndColumn As Long = L_MX) As ArrayEx
+Public Function Sort(Optional ByVal Descending As Boolean, Optional ByVal StartIndex As Long = L_NG, Optional ByVal EndIndex As Long = L_NG) As ListEx
     
     On Error GoTo ErrHandler
     
-    Dim b() As Long
     Dim e As Long
     Dim i As Long
     Dim j As Long
@@ -427,19 +323,17 @@ Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As
     
     If p_Array.lPointer Then
         
-        x = ArrVariantToIndexes(StartIndexes, b)
+        e = p_Array.uBounds(0).lElements + L_NG
         
-        u = UBound(b)
+        If StartIndex > 0& And StartIndex <= e Then s = StartIndex
+        If EndIndex >= s And EndIndex <= e Then e = EndIndex
         
-        s = b(u)
-        e = p_Array.uBounds(0).lLowest + p_Array.uBounds(0).lElements + L_NG
-        If EndColumn > s And EndColumn < e Then e = EndColumn
-        
-        b(u) = (s + e) \ 2&
+        u = (s + e) \ 2&
+        x = VarPtr(u)
         
         VariantSetType p, p_Array.lVarType
         
-        If ArrayElementGet(p_Array, x, p) = 0& Then
+        If ArrayElementGet(p_Array, VarPtr(u), p) = 0& Then
             
             VariantSetType v1, p_Array.lVarType
             VariantSetType v2, p_Array.lVarType
@@ -451,7 +345,7 @@ Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As
                 
                 Do
                     
-                    b(u) = i
+                    u = i
                     
                     ArrayElementGet p_Array, x, v1
                     
@@ -461,7 +355,7 @@ Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As
                 
                 Do
                     
-                    b(u) = j
+                    u = j
                     
                     ArrayElementGet p_Array, x, v2
                     
@@ -472,7 +366,7 @@ Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As
                 If i <= j Then
                     
                     ArrayElementSet p_Array, x, v1
-                    b(u) = i
+                    u = i
                     ArrayElementSet p_Array, x, v2
                     
                     i = i + 1&
@@ -486,20 +380,18 @@ Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As
             VariantZero v2
             
             If s < j Then
-                b(u) = s
-                Sort b, Descending, j
+                u = s
+                Sort Descending, u, j
             End If
             
             If i < e Then
-                b(u) = i
-                Sort b, Descending, e
+                u = i
+                Sort Descending, u, e
             End If
         
         End If
         
         VariantZero p
-        
-        Erase b
     
     End If
 
@@ -507,55 +399,31 @@ ErrHandler:
 
 End Function
 
-Public Function ToString(ByRef StartIndexes As Variant, Optional ByRef Delimeter As String, Optional ByVal EndColumn As Long = L_MX) As StringEx
+Public Function ToString(Optional ByRef Delimeter As String, Optional ByVal StartIndex As Long = L_NG, Optional ByVal EndIndex As Long = L_NG) As StringEx
     
-    Dim b() As Long
     Dim i As Long
-    Dim x As Long
-    Dim u As Long
+    Dim j As Long
     Dim v As Variant
     
     Set ToString = New StringEx
     
     If p_Array.lPointer Then
         
-        x = ArrVariantToIndexes(StartIndexes, b)
-        u = UBound(b)
+        j = p_Array.uBounds(0).lElements + L_NG
         
-        i = p_Array.uBounds(0).lLowest + p_Array.uBounds(0).lElements + L_NG
-        If EndColumn > b(u) And EndColumn < i Then i = EndColumn
+        If StartIndex > 0& And StartIndex <= j Then i = StartIndex
+        If EndIndex >= i And EndIndex <= j Then j = EndIndex
         
         VariantSetType v, p_Array.lVarType
         
-        For i = b(u) To i
+        For i = i To j
             
-            b(u) = i
-            
-            If ArrayElementGet(p_Array, x, v) = 0& Then ToString.Concat((v)).Concat Delimeter
+            If ArrayElementGet(p_Array, VarPtr(i), v) = 0& Then ToString.Concat((v)).Concat Delimeter
         
         Next i
         
         VariantZero v
-        
-        Erase b
     
     End If
-
-End Function
-
-Private Function ArrVariantToIndexes(ByVal SourceArray As Variant, ByRef OutputArray() As Long) As Long
-    
-    Dim i As Long
-    Dim u As Long
-    
-    u = UBound(SourceArray)
-    
-    ReDim OutputArray(u)
-    
-    For i = 0& To u
-        OutputArray(i) = SourceArray(i)
-    Next i
-    
-    ArrVariantToIndexes = VarPtr(OutputArray(0))
 
 End Function
