@@ -248,7 +248,7 @@ ErrHandler:
 
 End Function
 
-Public Function Destroy() As ArrayEx
+Public Function Destroy() As ListEx
     
     Set Destroy = IFTypesArray_Destroy
 
