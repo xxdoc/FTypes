@@ -155,6 +155,12 @@ Public Function Range(ByVal MinValue As Byte, ByVal MaxValue As Byte) As ByteEx
 
 End Function
 
+Public Function ToArray() As ListEx
+    
+    Set ToArray = IFTypesBasic_ToList
+
+End Function
+
 Public Function ToBoolean() As BooleanEx
     
     Set ToBoolean = New BooleanEx

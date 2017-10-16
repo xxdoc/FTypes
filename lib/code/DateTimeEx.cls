@@ -43,7 +43,7 @@ Private Declare Sub GetSystemTime Lib "kernel32" (uSystemTime As TSYSTEMTIME)
 
 Private Property Get IFTypesBasic_Length() As Long
     
-    IFTypesBasic_Length = 16&
+    IFTypesBasic_Length = 8&
 
 End Property
 
@@ -320,6 +320,16 @@ Public Function TimeSerial(ByVal Hour As Integer, ByVal Minute As Integer, ByVal
         .iSecond = Second
         .iMilliseconds = Millisecond
     End With
+
+End Function
+
+Public Function ToArray() As ListEx
+    
+    Set ToArray = New ListEx
+    
+    ToArray.Create vbByte, Length
+    
+    RtlMoveMemory ByVal ToArray.Data, ByVal Pointer, Length
 
 End Function
 

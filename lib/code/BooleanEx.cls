@@ -127,6 +127,16 @@ Public Function Reverse() As BooleanEx
 
 End Function
 
+Public Function ToArray() As ListEx
+    
+    Set ToArray = New ListEx
+    
+    ToArray.Create vbByte, Length
+    
+    RtlMoveMemory ByVal ToArray.Data, ByVal Pointer, Length
+
+End Function
+
 Public Function ToByte() As ByteEx
     
     Set ToByte = New ByteEx

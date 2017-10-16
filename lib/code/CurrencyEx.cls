@@ -166,6 +166,16 @@ Public Function Round(ByVal DecimalDigits As Long) As CurrencyEx
 
 End Function
 
+Public Function ToArray() As ListEx
+    
+    Set ToArray = New ListEx
+    
+    ToArray.Create vbByte, Length
+    
+    RtlMoveMemory ByVal ToArray.Data, ByVal Pointer, Length
+
+End Function
+
 Public Function ToBoolean() As BooleanEx
     
     Set ToBoolean = New BooleanEx
