@@ -15,7 +15,7 @@ Option Explicit
 
 'INTERFACES
 
-Implements IFTypesBasic
+Implements TypesInterface
 
 'CONSTANTS
 
@@ -28,21 +28,15 @@ Private p_Value As Single
 
 'PROPERTIES
 
-Private Property Get IFTypesBasic_Length() As Long
+Private Property Get TypesInterface_Pointer() As Long
     
-    IFTypesBasic_Length = 4&
-
-End Property
-
-Private Property Get IFTypesBasic_Pointer() As Long
-    
-    IFTypesBasic_Pointer = VarPtr(p_Value)
+    TypesInterface_Pointer = VarPtr(p_Value)
 
 End Property
 
 Public Property Get Length() As Long
     
-    Length = IFTypesBasic_Length
+    Length = 4&
 
 End Property
 
@@ -60,7 +54,7 @@ End Property
 
 Public Property Get Pointer() As Long
     
-    Pointer = IFTypesBasic_Pointer
+    Pointer = TypesInterface_Pointer
 
 End Property
 
@@ -80,11 +74,19 @@ End Property
 
 'METHODS
 
-Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
+Private Function TypesInterface_Clone() As TypesInterface
+    
+    Set TypesInterface_Clone = New SingleEx
+    
+    TypesInterface_Clone.Parse p_Value
+
+End Function
+
+Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
     
     Dim d As Double
     
-    Set IFTypesBasic_Parse = Me
+    Set TypesInterface_Parse = Me
     
     Select Case VarType(Value)
         
@@ -118,25 +120,15 @@ Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
 
 End Function
 
-Private Function IFTypesBasic_ToList() As IFTypesArray
-    
-    Set IFTypesBasic_ToList = New ListEx
-    
-    IFTypesBasic_ToList.Parse p_Value
-
-End Function
-
 Public Function Clone() As SingleEx
     
-    Set Clone = New SingleEx
-    
-    Clone.Value = p_Value
+    Set Clone = TypesInterface_Clone
 
 End Function
 
 Public Function Parse(ByRef Value As Variant) As SingleEx
     
-    Set Parse = IFTypesBasic_Parse(Value)
+    Set Parse = TypesInterface_Parse(Value)
 
 End Function
 
@@ -250,7 +242,9 @@ End Function
 
 Public Function ToList() As ListEx
     
-    Set ToList = IFTypesBasic_ToList
+    Set ToList = New ListEx
+    
+    ToList.Parse p_Value
 
 End Function
 

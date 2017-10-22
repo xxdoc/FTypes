@@ -15,7 +15,7 @@ Option Explicit
 
 'INTERFACES
 
-Implements IFTypesArray
+Implements TypesInterface
 
 'VARIABLES
 
@@ -31,21 +31,9 @@ End Sub
 
 'PROPERTIES
 
-Private Property Get IFTypesArray_Data() As Long
+Private Property Get TypesInterface_Pointer() As Long
     
-    IFTypesArray_Data = p_Array.lData
-
-End Property
-
-Private Property Get IFTypesArray_ElementSize() As Long
-    
-    IFTypesArray_ElementSize = p_Array.lElementSize
-
-End Property
-
-Private Property Get IFTypesArray_Pointer() As Long
-    
-    IFTypesArray_Pointer = p_Array.lPointer
+    TypesInterface_Pointer = p_Array.lPointer
 
 End Property
 
@@ -57,13 +45,13 @@ End Property
 
 Public Property Get Data() As Long
     
-    Data = IFTypesArray_Data
+    Data = p_Array.lData
 
 End Property
 
 Public Property Get ElementSize() As Long
     
-    ElementSize = IFTypesArray_ElementSize
+    ElementSize = p_Array.lElementSize
 
 End Property
 
@@ -87,7 +75,7 @@ End Property
 
 Public Property Get Pointer() As Long
     
-    Pointer = IFTypesArray_Pointer
+    Pointer = TypesInterface_Pointer
 
 End Property
 
@@ -124,11 +112,39 @@ End Property
 
 'METHODS
 
-Private Function IFTypesArray_Add(Item As Variant) As IFTypesArray
+Private Function TypesInterface_Clone() As TypesInterface
+    
+    Set TypesInterface_Clone = New ListEx
+    
+    If p_Array.lPointer Then TypesInterface_Clone.Parse Me.Value
+
+End Function
+
+Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
     
     Dim b(0) As TSAFEARRAYBOUND
     
-    Set IFTypesArray_Add = Me
+    Set TypesInterface_Parse = Me
+    
+    If (VarType(Value) And vbArray) = vbArray Then
+        
+        Me.Value = Value
+    
+    Else
+        
+        b(0).lElements = 1&
+        
+        If ArrayCreate(p_Array, VarType(Value), 1&, b) Then ArrayElementSet p_Array, VarPtr(b(0).lLowest), Value
+    
+    End If
+
+End Function
+
+Public Function Add(ByRef Item As Variant) As ListEx
+    
+    Dim b(0) As TSAFEARRAYBOUND
+    
+    Set Add = Me
     
     If p_Array.lPointer Then
         
@@ -143,44 +159,6 @@ Private Function IFTypesArray_Add(Item As Variant) As IFTypesArray
     End If
     
     ArrayElementSet p_Array, VarPtr(Count + L_NG), Item
-
-End Function
-
-Private Function IFTypesArray_Destroy() As IFTypesArray
-    
-    Set IFTypesArray_Destroy = Me
-    
-    ArrayDestroy p_Array
-
-End Function
-
-Private Function IFTypesArray_Parse(Value As Variant) As IFTypesArray
-    
-    Dim b(0) As TSAFEARRAYBOUND
-    
-    Set IFTypesArray_Parse = Me
-    
-    b(0).lElements = 1&
-    
-    If ArrayCreate(p_Array, VarType(Value), 1&, b) Then ArrayElementSet p_Array, VarPtr(b(0).lLowest), Value
-
-End Function
-
-Private Function IFTypesArray_Resize(ByVal NewUpperBound As Long) As IFTypesArray
-    
-    Set IFTypesArray_Resize = Me
-    
-    If p_Array.lPointer Then
-        
-        If NewUpperBound >= 0& And NewUpperBound < p_Array.uBounds(0&).lElements Then ArrayRedim p_Array, NewUpperBound + 1&
-    
-    End If
-
-End Function
-
-Public Function Add(ByRef Item As Variant) As ListEx
-    
-    Set Add = IFTypesArray_Add(Item)
 
 End Function
 
@@ -222,9 +200,7 @@ End Function
 
 Public Function Clone() As ListEx
     
-    Set Clone = New ListEx
-    
-    If p_Array.lPointer Then Clone.Value = Value
+    Set Clone = TypesInterface_Clone
 
 End Function
 
@@ -250,7 +226,9 @@ End Function
 
 Public Function Destroy() As ListEx
     
-    Set Destroy = IFTypesArray_Destroy
+    Set Destroy = Me
+    
+    ArrayDestroy p_Array
 
 End Function
 
@@ -309,13 +287,19 @@ End Function
 
 Public Function Parse(ByRef Value As Variant) As ListEx
     
-    Set Parse = IFTypesArray_Parse(Value)
+    Set Parse = TypesInterface_Parse(Value)
 
 End Function
 
 Public Function Resize(ByVal NewUpperBound As Long) As ListEx
     
-    Set Resize = IFTypesArray_Resize(NewUpperBound)
+    Set Resize = Me
+    
+    If p_Array.lPointer Then
+        
+        If NewUpperBound >= 0& And NewUpperBound < p_Array.uBounds(0&).lElements Then ArrayRedim p_Array, NewUpperBound + 1&
+    
+    End If
 
 End Function
 

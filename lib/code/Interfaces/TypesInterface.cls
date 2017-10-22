@@ -6,7 +6,7 @@ BEGIN
   DataSourceBehavior  = 0  'vbNone
   MTSTransactionMode  = 0  'NotAnMTSObject
 END
-Attribute VB_Name = "IFTypesBasic"
+Attribute VB_Name = "TypesInterface"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
@@ -15,20 +15,16 @@ Option Explicit
 
 'PROPERTIES
 
-Public Property Get Length() As Long
-    '
-End Property
-
 Public Property Get Pointer() As Long
     '
 End Property
 
 'METHODS
 
-Public Function Parse(ByRef Value As Variant) As IFTypesBasic
+Public Function Clone() As TypesInterface
     '
 End Function
 
-Public Function ToList() As IFTypesArray
+Public Function Parse(ByRef Value As Variant) As TypesInterface
     '
 End Function

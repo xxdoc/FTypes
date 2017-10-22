@@ -15,7 +15,7 @@ Option Explicit
 
 'INTERFACES
 
-Implements IFTypesBasic
+Implements TypesInterface
 
 'CONSTANTS
 
@@ -67,15 +67,9 @@ End Sub
 
 'PROPERTIES
 
-Private Property Get IFTypesBasic_Length() As Long
+Private Property Get TypesInterface_Pointer() As Long
     
-    IFTypesBasic_Length = p_ValueLen
-
-End Property
-
-Private Property Get IFTypesBasic_Pointer() As Long
-    
-    IFTypesBasic_Pointer = p_ValuePtr
+    TypesInterface_Pointer = p_ValuePtr
 
 End Property
 
@@ -97,13 +91,13 @@ End Property
 
 Public Property Get Length() As Long
     
-    Length = IFTypesBasic_Length
+    Length = p_ValueLen
 
 End Property
 
 Public Property Get Pointer() As Long
     
-    Pointer = IFTypesBasic_Pointer
+    Pointer = TypesInterface_Pointer
 
 End Property
 
@@ -135,7 +129,15 @@ End Property
 
 'METHODS
 
-Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
+Private Function TypesInterface_Clone() As TypesInterface
+    
+    Set TypesInterface_Clone = New StringEx
+    
+    If p_ValueLen Then TypesInterface_Clone.Parse VBA.Left$(p_Value, p_ValueLen)
+
+End Function
+
+Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
     
     Dim a As TSAFEARRAY
     Dim b As Integer
@@ -143,7 +145,7 @@ Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
     Dim j As Long
     Dim x As Long
     
-    Set IFTypesBasic_Parse = Me
+    Set TypesInterface_Parse = Me
     
     x = VarType(Value)
     
@@ -263,19 +265,9 @@ Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
 
 End Function
 
-Private Function IFTypesBasic_ToList() As IFTypesArray
-    
-    Set IFTypesBasic_ToList = New ListEx
-    
-    IFTypesBasic_ToList.Parse Me.Value
-
-End Function
-
 Public Function Clone() As StringEx
     
-    Set Clone = New StringEx
-    
-    If p_ValueLen Then Clone.Value = VBA.Left$(p_Value, p_ValueLen)
+    Set Clone = TypesInterface_Clone
 
 End Function
 
@@ -492,7 +484,7 @@ End Function
 
 Public Function Parse(ByRef Value As Variant) As StringEx
     
-    Set Parse = IFTypesBasic_Parse(Value)
+    Set Parse = TypesInterface_Parse(Value)
 
 End Function
 
@@ -661,7 +653,9 @@ End Function
 
 Public Function ToList() As ListEx
     
-    Set ToList = IFTypesBasic_ToList
+    Set ToList = New ListEx
+    
+    ToList.Parse Me.Value
 
 End Function
 

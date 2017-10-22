@@ -15,7 +15,7 @@ Option Explicit
 
 'INTERFACES
 
-Implements IFTypesBasic
+Implements TypesInterface
 
 'TYPES
 
@@ -41,15 +41,9 @@ Private Declare Sub GetSystemTime Lib "kernel32" (uSystemTime As TSYSTEMTIME)
 
 'PROPERTIES
 
-Private Property Get IFTypesBasic_Length() As Long
+Private Property Get TypesInterface_Pointer() As Long
     
-    IFTypesBasic_Length = 8&
-
-End Property
-
-Private Property Get IFTypesBasic_Pointer() As Long
-    
-    IFTypesBasic_Pointer = VarPtr(p_Value)
+    TypesInterface_Pointer = VarPtr(p_Value)
 
 End Property
 
@@ -73,7 +67,7 @@ End Property
 
 Public Property Get Length() As Long
     
-    Length = IFTypesBasic_Length
+    Length = 8&
 
 End Property
 
@@ -115,7 +109,7 @@ End Property
 
 Public Property Get Pointer() As Long
     
-    Pointer = IFTypesBasic_Pointer
+    Pointer = TypesInterface_Pointer
 
 End Property
 
@@ -181,9 +175,17 @@ End Property
 
 'METHODS
 
-Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
+Private Function TypesInterface_Clone() As TypesInterface
     
-    Set IFTypesBasic_Parse = Me
+    Set TypesInterface_Clone = New DateTimeEx
+    
+    TypesInterface_Clone.Parse Me.Value
+
+End Function
+
+Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
+    
+    Set TypesInterface_Parse = Me
     
     Select Case VarType(Value)
         
@@ -209,14 +211,6 @@ Private Function IFTypesBasic_Parse(Value As Variant) As IFTypesBasic
             End With
     
     End Select
-
-End Function
-
-Private Function IFTypesBasic_ToList() As IFTypesArray
-    
-    Set IFTypesBasic_ToList = New ListEx
-    
-    IFTypesBasic_ToList.Parse Me.Value
 
 End Function
 
@@ -278,9 +272,7 @@ End Function
 
 Public Function Clone() As DateTimeEx
     
-    Set Clone = New DateTimeEx
-    
-    Clone.Value = Me.Value
+    Set Clone = TypesInterface_Clone
 
 End Function
 
@@ -306,7 +298,7 @@ End Function
 
 Public Function Parse(ByRef Value As Variant) As DateTimeEx
     
-    Set Parse = IFTypesBasic_Parse(Value)
+    Set Parse = TypesInterface_Parse(Value)
 
 End Function
 
@@ -335,7 +327,9 @@ End Function
 
 Public Function ToList() As ListEx
     
-    Set ToList = IFTypesBasic_ToList
+    Set ToList = New ListEx
+    
+    ToList.Parse Me.Value
 
 End Function
 
