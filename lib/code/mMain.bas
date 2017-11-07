@@ -129,33 +129,33 @@ Public Sub ArrayDestroy(ByRef SafeArray As TSAFEARRAY)
 
 End Sub
 
-Public Function ArrayElementGet(ByRef SafeArray As TSAFEARRAY, ByVal Indexes As Long, ByRef Value As Variant) As Long
+Public Function ArrayElementGet(ByRef SafeArray As TSAFEARRAY, ByVal Indexes As Long, ByRef Value As Variant) As Boolean
     
     Select Case SafeArray.lVarType
-        Case vbDecimal: ArrayElementGet = SafeArrayGetElement(SafeArray.lPointer, Indexes, ByVal VarPtr(Value))
-        Case vbVariant: ArrayElementGet = SafeArrayGetElement(SafeArray.lPointer, Indexes, Value)
-        Case Else: ArrayElementGet = SafeArrayGetElement(SafeArray.lPointer, Indexes, ByVal VarPtr(Value) + 8&)
+        Case vbDecimal: ArrayElementGet = (SafeArrayGetElement(SafeArray.lPointer, Indexes, ByVal VarPtr(Value)) = 0&)
+        Case vbVariant: ArrayElementGet = (SafeArrayGetElement(SafeArray.lPointer, Indexes, Value) = 0&)
+        Case Else: ArrayElementGet = (SafeArrayGetElement(SafeArray.lPointer, Indexes, ByVal VarPtr(Value) + 8&) = 0&)
     End Select
 
 End Function
 
-Public Sub ArrayElementSet(ByRef SafeArray As TSAFEARRAY, ByVal Indexes As Long, ByRef Value As Variant)
+Public Function ArrayElementSet(ByRef SafeArray As TSAFEARRAY, ByVal Indexes As Long, ByRef Value As Variant) As Boolean
     
     Select Case SafeArray.lVarType
-        Case vbBoolean: SafeArrayPutElement SafeArray.lPointer, Indexes, CBool(Value)
-        Case vbByte: SafeArrayPutElement SafeArray.lPointer, Indexes, CByte(Value)
-        Case vbCurrency: SafeArrayPutElement SafeArray.lPointer, Indexes, CCur(Value)
-        Case vbDate: SafeArrayPutElement SafeArray.lPointer, Indexes, CDate(Value)
-        Case vbError, vbLong: SafeArrayPutElement SafeArray.lPointer, Indexes, CLng(Value)
-        Case vbDecimal: SafeArrayPutElement SafeArray.lPointer, Indexes, ByVal VarPtr(CDec(Value))
-        Case vbDouble: SafeArrayPutElement SafeArray.lPointer, Indexes, CDbl(Value)
-        Case vbInteger: SafeArrayPutElement SafeArray.lPointer, Indexes, CInt(Value)
-        Case vbSingle: SafeArrayPutElement SafeArray.lPointer, Indexes, CSng(Value)
-        Case vbString: SafeArrayPutElement SafeArray.lPointer, Indexes, ByVal StrPtr(Value)
-        Case Else: SafeArrayPutElement SafeArray.lPointer, Indexes, Value
+        Case vbBoolean: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, CBool(Value)) = 0&)
+        Case vbByte: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, CByte(Value)) = 0&)
+        Case vbCurrency: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, CCur(Value)) = 0&)
+        Case vbDate: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, CDate(Value)) = 0&)
+        Case vbError, vbLong: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, CLng(Value)) = 0&)
+        Case vbDecimal: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, ByVal VarPtr(CDec(Value))) = 0&)
+        Case vbDouble: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, CDbl(Value)) = 0&)
+        Case vbInteger: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, CInt(Value)) = 0&)
+        Case vbSingle: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, CSng(Value)) = 0&)
+        Case vbString: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, ByVal StrPtr(Value)) = 0&)
+        Case Else: ArrayElementSet = (SafeArrayPutElement(SafeArray.lPointer, Indexes, Value) = 0&)
     End Select
 
-End Sub
+End Function
 
 Public Sub ArrayPtr(ByRef SafeArray As TSAFEARRAY, ByVal SourceArrayPtr As Long, Optional ByVal IsExternal As Boolean)
     

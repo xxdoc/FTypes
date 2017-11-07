@@ -57,7 +57,7 @@ End Property
 
 Public Property Get Item(ByVal Index As Long) As Variant
     
-    If Index >= 0& And Index <= Count Then
+    If Index >= 0& And Index < Count Then
         
         VariantSetType Item, p_Array.lVarType
         
@@ -69,7 +69,7 @@ End Property
 
 Public Property Let Item(ByVal Index As Long, ByRef NewValue As Variant)
     
-    If Index >= 0& And Index <= Count Then ArrayElementSet p_Array, VarPtr(Index), NewValue
+    If Index >= 0& And Index < Count Then ArrayElementSet p_Array, VarPtr(Index), NewValue
 
 End Property
 
@@ -134,7 +134,7 @@ Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
         
         b(0).lElements = 1&
         
-        If ArrayCreate(p_Array, VarType(Value), 1&, b) Then ArrayElementSet p_Array, VarPtr(b(0).lLowest), Value
+        If ArrayCreate(p_Array, VarType(Value), 1&, b) Then ArrayElementSet p_Array, VarPtr(0&), Value
     
     End If
 
@@ -206,8 +206,6 @@ End Function
 
 Public Function Create(ByVal ArrayType As VbVarType, ByVal Elements As Long) As ListEx
     
-    On Error GoTo ErrHandler
-    
     Dim b(0) As TSAFEARRAYBOUND
     
     Set Create = Me
@@ -219,8 +217,6 @@ Public Function Create(ByVal ArrayType As VbVarType, ByVal Elements As Long) As 
         ArrayCreate p_Array, ArrayType, 1&, b
     
     End If
-
-ErrHandler:
 
 End Function
 
@@ -285,9 +281,85 @@ Public Function Distinct() As ListEx
 
 End Function
 
+Public Function Filter(ParamArray Values()) As ListEx
+    
+    Dim i As Long
+    Dim j As Long
+    Dim x As Long
+    Dim u As Long
+    Dim v As Variant
+    
+    Set Filter = Me
+    
+    u = UBound(Values)
+    
+    If u > L_NG Then
+        
+        VariantSetType v, p_Array.lVarType
+        
+        For i = 0& To Count + L_NG
+            
+            ArrayElementGet p_Array, VarPtr(i), v
+            
+            For j = 0& To u
+                
+                If v = Values(j) Then
+                    
+                    If i <> x Then Item(x) = v
+                    
+                    x = x + 1&
+                    
+                    Exit For
+                
+                End If
+            
+            Next j
+        
+        Next i
+        
+        VariantZero v
+        
+        If x Then Resize x + L_NG Else ArrayDestroy p_Array
+    
+    End If
+
+End Function
+
 Public Function Parse(ByRef Value As Variant) As ListEx
     
     Set Parse = TypesInterface_Parse(Value)
+
+End Function
+
+Public Function Remove(ByVal Index As Long) As ListEx
+    
+    Dim c As Long
+    Dim i As Long
+    Dim v As Variant
+    
+    Set Remove = Me
+    
+    c = Count + L_NG
+    
+    If Index >= 0& And Index <= c Then
+        
+        VariantSetType v, p_Array.lVarType
+        
+        For i = Index To c
+            
+            If i < c Then
+                
+                If ArrayElementGet(p_Array, VarPtr(i + 1&), v) Then ArrayElementSet p_Array, VarPtr(i), v
+            
+            End If
+        
+        Next i
+        
+        VariantZero v
+        
+        ArrayRedim p_Array, c
+    
+    End If
 
 End Function
 
@@ -331,7 +403,7 @@ Public Function Sort(Optional ByVal Descending As Boolean, Optional ByVal StartI
         
         VariantSetType p, p_Array.lVarType
         
-        If ArrayElementGet(p_Array, VarPtr(u), p) = 0& Then
+        If ArrayElementGet(p_Array, VarPtr(u), p) Then
             
             VariantSetType v1, p_Array.lVarType
             VariantSetType v2, p_Array.lVarType
@@ -416,7 +488,7 @@ Public Function ToString(Optional ByRef Delimeter As String, Optional ByVal Star
         
         For i = i To j
             
-            If ArrayElementGet(p_Array, VarPtr(i), v) = 0& Then ToString.Concat((v)).Concat Delimeter
+            If ArrayElementGet(p_Array, VarPtr(i), v) Then ToString.Concat((v)).Concat Delimeter
         
         Next i
         
