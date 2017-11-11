@@ -204,15 +204,15 @@ Public Function Clone() As ListEx
 
 End Function
 
-Public Function Create(ByVal ArrayType As VbVarType, ByVal Elements As Long) As ListEx
+Public Function Create(ByVal ArrayType As VbVarType, ByVal Count As Long) As ListEx
     
     Dim b(0) As TSAFEARRAYBOUND
     
     Set Create = Me
     
-    If Elements > 0& Then
+    If Count > 0& Then
         
-        b(0).lElements = Elements
+        b(0).lElements = Count
         
         ArrayCreate p_Array, ArrayType, 1&, b
     
@@ -319,7 +319,7 @@ Public Function Filter(ParamArray Values()) As ListEx
         
         VariantZero v
         
-        If x Then Resize x + L_NG Else ArrayDestroy p_Array
+        ArrayRedim p_Array, x
     
     End If
 

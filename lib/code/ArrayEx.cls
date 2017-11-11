@@ -330,64 +330,6 @@ Public Function Destroy() As ArrayEx
 
 End Function
 
-Public Function Distinct() As ArrayEx
-    
-    Dim i As Long
-    Dim j As Long
-    Dim v1 As Variant
-    Dim v2 As Variant
-    Dim u As Long
-    Dim x As Long
-    
-    Set Distinct = Me
-    
-    If p_Array.lPointer > 0& And p_Array.iDims = 1& Then
-        
-        i = BoundL
-        x = i
-        
-        Sort Array(i)
-        
-        u = BoundU
-        
-        VariantSetType v1, p_Array.lVarType
-        VariantSetType v2, p_Array.lVarType
-        
-        Do
-            
-            ArrayElementGet p_Array, VarPtr(i), v1
-            
-            For j = i + 1& To u
-                
-                i = j
-                
-                ArrayElementGet p_Array, VarPtr(j), v2
-                
-                If v1 <> v2 Then
-                    
-                    x = x + 1&
-                    
-                    ArrayElementSet p_Array, VarPtr(x), v2
-                    
-                    Exit For
-                
-                End If
-            
-            Next j
-        
-        Loop While i < u
-        
-        VariantZero v1
-        VariantZero v2
-        
-        p_Array.uBounds(0&).lElements = x - p_Array.uBounds(0&).lLowest + 1&
-        
-        Resize x
-    
-    End If
-
-End Function
-
 Public Function Parse(ByRef Value As Variant) As ArrayEx
     
     Set Parse = TypesInterface_Parse(Value)
@@ -406,106 +348,50 @@ Public Function Resize(ByVal NewUpperBound As Long) As ArrayEx
 
 End Function
 
-Public Function Sort(ByRef StartIndexes As Variant, Optional ByVal Descending As Boolean, Optional ByVal EndColumn As Long = L_MX) As ArrayEx
+Public Function ToList(ByRef StartIndexes As Variant, ByRef EndIndexes As Variant) As ListEx
     
     On Error GoTo ErrHandler
     
     Dim b() As Long
-    Dim e As Long
     Dim i As Long
-    Dim j As Long
-    Dim p As Variant
-    Dim s As Long
     Dim x As Long
-    Dim v1 As Variant
-    Dim v2 As Variant
     Dim u As Long
+    Dim v As Variant
     
-    Set Sort = Me
+    Set ToList = New ListEx
     
     If p_Array.lPointer Then
         
         x = ArrVariantToIndexes(StartIndexes, b)
-        
         u = UBound(b)
         
-        s = b(u)
-        e = p_Array.uBounds(0).lLowest + p_Array.uBounds(0).lElements + L_NG
-        If EndColumn > s And EndColumn < e Then e = EndColumn
+        VariantSetType v, p_Array.lVarType
         
-        b(u) = (s + e) \ 2&
-        
-        VariantSetType p, p_Array.lVarType
-        
-        If ArrayElementGet(p_Array, x, p) = 0& Then
+        For i = b(u) To EndIndexes(UBound(EndIndexes))
             
-            VariantSetType v1, p_Array.lVarType
-            VariantSetType v2, p_Array.lVarType
+            b(u) = i
             
-            i = s
-            j = e
-            
-            While i <= j
+            If ArrayElementGet(p_Array, x, v) Then
                 
-                Do
-                    
-                    b(u) = i
-                    
-                    ArrayElementGet p_Array, x, v1
-                    
-                    If ((Descending = False And v1 < p) Or (Descending = True And v1 > p)) And i < e Then i = i + 1& Else Exit Do
-                
-                Loop
-                
-                Do
-                    
-                    b(u) = j
-                    
-                    ArrayElementGet p_Array, x, v2
-                    
-                    If ((Descending = False And p < v2) Or (Descending = True And p > v2)) And j > s Then j = j + L_NG Else Exit Do
-                
-                Loop
-                
-                If i <= j Then
-                    
-                    ArrayElementSet p_Array, x, v1
-                    b(u) = i
-                    ArrayElementSet p_Array, x, v2
-                    
-                    i = i + 1&
-                    j = j + L_NG
-                
-                End If
+                If ToList.Pointer Then ToList.Add v Else ToList.Create(p_Array.lVarType, 1&).Item(0&) = v
             
-            Wend
-            
-            VariantZero v1
-            VariantZero v2
-            
-            If s < j Then
-                b(u) = s
-                Sort b, Descending, j
-            End If
-            
-            If i < e Then
-                b(u) = i
-                Sort b, Descending, e
             End If
         
-        End If
-        
-        VariantZero p
-        
-        Erase b
+        Next i
     
     End If
 
 ErrHandler:
+    
+    VariantZero v
+    
+    Erase b
 
 End Function
 
-Public Function ToString(ByRef StartIndexes As Variant, Optional ByRef Delimeter As String, Optional ByVal EndColumn As Long = L_MX) As StringEx
+Public Function ToString(ByRef StartIndexes As Variant, ByRef EndIndexes As Variant, Optional ByRef Delimeter As String) As StringEx
+    
+    On Error GoTo ErrHandler
     
     Dim b() As Long
     Dim i As Long
@@ -520,24 +406,23 @@ Public Function ToString(ByRef StartIndexes As Variant, Optional ByRef Delimeter
         x = ArrVariantToIndexes(StartIndexes, b)
         u = UBound(b)
         
-        i = p_Array.uBounds(0).lLowest + p_Array.uBounds(0).lElements + L_NG
-        If EndColumn > b(u) And EndColumn < i Then i = EndColumn
-        
         VariantSetType v, p_Array.lVarType
         
-        For i = b(u) To i
+        For i = b(u) To EndIndexes(UBound(EndIndexes))
             
             b(u) = i
             
-            If ArrayElementGet(p_Array, x, v) = 0& Then ToString.Concat((v)).Concat Delimeter
+            If ArrayElementGet(p_Array, x, v) Then ToString.Concat((v)).Concat Delimeter
         
         Next i
-        
-        VariantZero v
-        
-        Erase b
     
     End If
+
+ErrHandler:
+    
+    VariantZero v
+    
+    Erase b
 
 End Function
 
