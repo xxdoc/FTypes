@@ -325,6 +325,14 @@ Public Function Filter(ParamArray Values()) As ListEx
 
 End Function
 
+Public Function NewEnum() As IEnumVARIANT
+Attribute NewEnum.VB_UserMemId = -4
+Attribute NewEnum.VB_MemberFlags = "40"
+    
+    Set NewEnum = NewEnumerator(Me, Count + L_NG)
+
+End Function
+
 Public Function Parse(ByRef Value As Variant) As ListEx
     
     Set Parse = TypesInterface_Parse(Value)
