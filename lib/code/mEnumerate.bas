@@ -17,17 +17,11 @@ Private Type TENUMERATOR
     uEnumerable As Object
     lIndex As Long
     lUpper As Long
-    lLower As Long
 End Type
-
-'CONSTANTS
-
-Private Const E_NOTIMPL As Long = &H80004001
-Private Const E_POINTER As Long = &H80004003
 
 'VARIABLES
 
-Private m_Table(6) As Long
+Private m_Table(3) As Long
 
 'WINAPI
 
@@ -39,57 +33,23 @@ Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal lMem As Long)
 
 'METHODS
 
-Private Function IEnumVARIANT_Clone(ByRef This As TENUMERATOR, ByVal lEnum As Long) As Long
-    
-    IEnumVARIANT_Clone = E_NOTIMPL
-
-End Function
-
 Private Function IEnumVARIANT_Next(ByRef This As TENUMERATOR, ByVal lCelt As Long, ByVal lVar As Long, ByVal lFetched As Long) As Long
     
-    Dim Fetched As Long
-    
-    If lVar Then
+    With This
         
-        With This
+        If .lIndex > .lUpper Then
             
-            Do Until .lIndex > .lUpper
-                
-                VariantCopy lVar, .uEnumerable.Item(.lIndex)
-                
-                .lIndex = .lIndex + 1&
-                
-                Fetched = Fetched + 1&
-                
-                If Fetched = lCelt Then Exit Do
-                
-                lVar = (lVar Xor &H80000000) + 16& Xor &H80000000
+            IEnumVARIANT_Next = 1&
+        
+        Else
             
-            Loop
+            VariantCopy lVar, .uEnumerable.Item(.lIndex)
+            
+            .lIndex = .lIndex + 1&
         
-        End With
-        
-        If lFetched Then GetMem4 Fetched, ByVal lFetched
-        
-        If Fetched < lCelt Then IEnumVARIANT_Next = 1&
+        End If
     
-    Else
-        
-        IEnumVARIANT_Next = E_POINTER
-    
-    End If
-
-End Function
-
-Private Function IEnumVARIANT_Reset(ByRef This As TENUMERATOR) As Long
-    
-    IEnumVARIANT_Reset = E_NOTIMPL
-
-End Function
-
-Private Function IEnumVARIANT_Skip(ByRef This As TENUMERATOR, ByVal lCelt As Long) As Long
-    
-    IEnumVARIANT_Skip = E_NOTIMPL
+    End With
 
 End Function
 
@@ -107,17 +67,9 @@ End Function
 
 Private Function IUnknown_QueryInterface(ByRef This As TENUMERATOR, ByVal lRiid As Long, ByVal lObject As Long) As Long
     
-    If lObject Then
-        
-        GetMem4 VarPtr(This), ByVal lObject
-        
-        IUnknown_AddRef This
+    GetMem4 VarPtr(This), ByVal lObject
     
-    Else
-        
-        IUnknown_QueryInterface = E_POINTER
-    
-    End If
+    This.lReferences = This.lReferences + 1&
 
 End Function
 
@@ -152,9 +104,6 @@ Public Function NewEnumerator(ByRef uEnumerable As Object, ByVal lUpper As Long)
         RtlMoveMemory m_Table(1), AddressOf IUnknown_AddRef, 4&
         RtlMoveMemory m_Table(2), AddressOf IUnknown_Release, 4&
         RtlMoveMemory m_Table(3), AddressOf IEnumVARIANT_Next, 4&
-        RtlMoveMemory m_Table(4), AddressOf IEnumVARIANT_Skip, 4&
-        RtlMoveMemory m_Table(5), AddressOf IEnumVARIANT_Reset, 4&
-        RtlMoveMemory m_Table(6), AddressOf IEnumVARIANT_Clone, 4&
     
     End If
     
