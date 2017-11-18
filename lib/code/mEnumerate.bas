@@ -19,9 +19,13 @@ Private Type TENUMERATOR
     lUpper As Long
 End Type
 
+'CONSTANTS
+
+Private Const E_NOTIMPL As Long = &H80004001
+
 'VARIABLES
 
-Private m_Table(3) As Long
+Private m_Table(6) As Long
 
 'WINAPI
 
@@ -32,6 +36,12 @@ Private Declare Function VariantCopy Lib "oleaut32" (ByVal lTarget As Long, ByRe
 Private Declare Sub CoTaskMemFree Lib "ole32" (ByVal lMem As Long)
 
 'METHODS
+
+Private Function IEnumVARIANT_Clone(ByRef This As TENUMERATOR, ByVal lEnum As Long) As Long
+    
+    IEnumVARIANT_Clone = E_NOTIMPL
+
+End Function
 
 Private Function IEnumVARIANT_Next(ByRef This As TENUMERATOR, ByVal lCelt As Long, ByVal lVar As Long, ByVal lFetched As Long) As Long
     
@@ -50,6 +60,18 @@ Private Function IEnumVARIANT_Next(ByRef This As TENUMERATOR, ByVal lCelt As Lon
         End If
     
     End With
+
+End Function
+
+Private Function IEnumVARIANT_Reset(ByRef This As TENUMERATOR) As Long
+    
+    IEnumVARIANT_Reset = E_NOTIMPL
+
+End Function
+
+Private Function IEnumVARIANT_Skip(ByRef This As TENUMERATOR, ByVal lCelt As Long) As Long
+    
+    IEnumVARIANT_Skip = E_NOTIMPL
 
 End Function
 
@@ -104,6 +126,9 @@ Public Function NewEnumerator(ByRef uEnumerable As Object, ByVal lUpper As Long)
         RtlMoveMemory m_Table(1), AddressOf IUnknown_AddRef, 4&
         RtlMoveMemory m_Table(2), AddressOf IUnknown_Release, 4&
         RtlMoveMemory m_Table(3), AddressOf IEnumVARIANT_Next, 4&
+        RtlMoveMemory m_Table(4), AddressOf IEnumVARIANT_Skip, 4&
+        RtlMoveMemory m_Table(5), AddressOf IEnumVARIANT_Reset, 4&
+        RtlMoveMemory m_Table(6), AddressOf IEnumVARIANT_Clone, 4&
     
     End If
     
