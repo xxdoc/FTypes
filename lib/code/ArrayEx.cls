@@ -201,7 +201,7 @@ Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
     
     Else
         
-        If ArrayCreateVector(p_Array, VarType(Value), 1&) Then ArrayElementSet p_Array, VarPtr(b(0).lLowest), Value
+        If ArrayCreateVector(p_Array, VarType(Value), 1&) Then ArrayElementSet p_Array, VarPtr(0&), Value
     
     End If
 
