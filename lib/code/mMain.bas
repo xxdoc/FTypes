@@ -121,6 +121,16 @@ Public Function ArrayCreate(ByRef SafeArray As TSAFEARRAY, ByVal SafeArrayType A
 
 End Function
 
+Public Function ArrayCreateVector(ByRef SafeArray As TSAFEARRAY, ByVal SafeArrayType As VbVarType, ByVal SafeArrayElements As Long) As Boolean
+    
+    Dim b(0) As TSAFEARRAYBOUND
+    
+    b(0).lElements = SafeArrayElements
+    
+    ArrayCreateVector = ArrayCreate(SafeArray, SafeArrayType, 1&, b)
+
+End Function
+
 Public Sub ArrayDestroy(ByRef SafeArray As TSAFEARRAY)
     
     SafeArrayDestroy SafeArray.lPointer

@@ -193,8 +193,6 @@ End Function
 
 Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
     
-    Dim b(0) As TSAFEARRAYBOUND
-    
     Set TypesInterface_Parse = Me
     
     If (VarType(Value) And vbArray) = vbArray Then
@@ -203,9 +201,7 @@ Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
     
     Else
         
-        b(0).lElements = 1&
-        
-        If ArrayCreate(p_Array, VarType(Value), 1&, b) Then ArrayElementSet p_Array, VarPtr(b(0).lLowest), Value
+        If ArrayCreateVector(p_Array, VarType(Value), 1&) Then ArrayElementSet p_Array, VarPtr(b(0).lLowest), Value
     
     End If
 
@@ -213,7 +209,6 @@ End Function
 
 Public Function Add(ByRef Item As Variant) As ArrayEx
     
-    Dim a(0) As TSAFEARRAYBOUND
     Dim b() As Long
     Dim x As Long
     
@@ -241,9 +236,7 @@ Public Function Add(ByRef Item As Variant) As ArrayEx
     
     Else
         
-        a(0).lElements = 1&
-        
-        If ArrayCreate(p_Array, VarType(Item), 1&, a) Then ArrayElementSet p_Array, VarPtr(0&), Item
+        If ArrayCreateVector(p_Array, VarType(Item), 1&) Then ArrayElementSet p_Array, VarPtr(0&), Item
     
     End If
 

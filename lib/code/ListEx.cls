@@ -96,15 +96,12 @@ End Property
 Public Property Let Value(ByRef NewValue As Variant)
     
     Dim a As TSAFEARRAY
-    Dim b(0) As TSAFEARRAYBOUND
     
     ArrayPtr a, VarPtr(NewValue) * (((VarType(NewValue) And vbArray) = vbArray) * L_NG), True
     
     If a.lPointer > 0& And a.iDims = 1 Then
         
-        b(0).lElements = a.uBounds(0).lElements
-        
-        If ArrayCreate(p_Array, a.lVarType, a.iDims, b) Then ArrayCopy p_Array, a.lPointer
+        If ArrayCreateVector(p_Array, a.lVarType, a.uBounds(0).lElements) Then ArrayCopy p_Array, a.lPointer
     
     End If
 
@@ -122,8 +119,6 @@ End Function
 
 Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
     
-    Dim b(0) As TSAFEARRAYBOUND
-    
     Set TypesInterface_Parse = Me
     
     If (VarType(Value) And vbArray) = vbArray Then
@@ -132,9 +127,7 @@ Private Function TypesInterface_Parse(Value As Variant) As TypesInterface
     
     Else
         
-        b(0).lElements = 1&
-        
-        If ArrayCreate(p_Array, VarType(Value), 1&, b) Then ArrayElementSet p_Array, VarPtr(0&), Value
+        If ArrayCreateVector(p_Array, VarType(Value), 1&) Then ArrayElementSet p_Array, VarPtr(0&), Value
     
     End If
 
@@ -142,21 +135,9 @@ End Function
 
 Public Function Add(ByRef Item As Variant) As ListEx
     
-    Dim b(0) As TSAFEARRAYBOUND
-    
     Set Add = Me
     
-    If p_Array.lPointer Then
-        
-        ArrayRedim p_Array, p_Array.uBounds(0).lElements + 1&
-    
-    Else
-        
-        b(0).lElements = 1&
-        
-        ArrayCreate p_Array, VarType(Item), 1&, b
-    
-    End If
+    If p_Array.lPointer Then ArrayRedim p_Array, p_Array.uBounds(0).lElements + 1& Else ArrayCreateVector p_Array, VarType(Item), 1&
     
     ArrayElementSet p_Array, VarPtr(Count + L_NG), Item
 
@@ -206,17 +187,9 @@ End Function
 
 Public Function Create(ByVal ArrayType As VbVarType, ByVal Count As Long) As ListEx
     
-    Dim b(0) As TSAFEARRAYBOUND
-    
     Set Create = Me
     
-    If Count > 0& Then
-        
-        b(0).lElements = Count
-        
-        ArrayCreate p_Array, ArrayType, 1&, b
-    
-    End If
+    ArrayCreateVector p_Array, ArrayType, Count
 
 End Function
 
