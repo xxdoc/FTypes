@@ -91,7 +91,7 @@ End Property
 
 Public Property Get HashCode() As Long
     
-    If CryptCreate And p_ValueLen Then HashCode = p_CryptHash
+    If CryptCreate Then HashCode = p_CryptHash
 
 End Property
 
