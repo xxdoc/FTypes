@@ -89,6 +89,12 @@ Public Property Get Capacity() As Long
 
 End Property
 
+Public Property Get HashCode() As Long
+    
+    If CryptCreate And p_ValueLen Then HashCode = p_CryptHash
+
+End Property
+
 Public Property Get Length() As Long
     
     Length = p_ValueLen
