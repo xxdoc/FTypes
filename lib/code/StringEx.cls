@@ -37,6 +37,8 @@ Private Declare Function CharLowerBuffA Lib "user32" (ByVal sStr As String, ByVa
 Private Declare Function CharLowerBuffW Lib "user32" (ByVal lStr As Long, ByVal lLength As Long) As Long
 Private Declare Function CharUpperBuffA Lib "user32" (ByVal sStr As String, ByVal lLength As Long) As Long
 Private Declare Function CharUpperBuffW Lib "user32" (ByVal lStr As Long, ByVal lLength As Long) As Long
+Private Declare Function CompareStringA Lib "kernel32" (ByVal lLocale As Long, ByVal lFlags As Long, ByVal sString1 As String, ByVal lCount1 As Long, ByVal sString2 As String, ByVal lCount2 As Long) As Long
+Private Declare Function CompareStringW Lib "kernel32" (ByVal lLocale As Long, ByVal lFlags As Long, ByVal lString1 As Long, ByVal lCount1 As Long, ByVal lString2 As Long, ByVal lCount2 As Long) As Long
 Private Declare Function CryptAcquireContextA Lib "advapi32" (lProvider As Long, ByVal sContainer As String, ByVal sProvider As String, ByVal lType As Long, ByVal lFlags As Long) As Long
 Private Declare Function CryptAcquireContextW Lib "advapi32" (lProvider As Long, ByVal lContainer As Long, ByVal lProvider As Long, ByVal lType As Long, ByVal lFlags As Long) As Long
 Private Declare Function CryptCreateHash Lib "advapi32" (ByVal lProvider As Long, ByVal lAlgoritm As Long, ByVal lKey As Long, ByVal lFlags As Long, lHash As Long) As Long
@@ -77,7 +79,7 @@ Public Property Get Asc(Optional ByVal Index As Long) As Long
     
     If p_ValueLen Then
         
-        If Index > 0& And Index <= p_ValueLen Then Asc = AscW(Strings.Mid$(p_Value, Index, 1&)) Else Asc = AscW(p_Value)
+        If Index >= 0& And Index <= p_ValueLen Then RtlMoveMemory Asc, ByVal p_ValuePtr + ((Index + (Index > 0&)) * 2&), 2&
     
     End If
 
@@ -277,11 +279,25 @@ Public Function Clone() As StringEx
 
 End Function
 
-Public Function Compare(ByRef CompareString As String, Optional ByVal CompareMethod As VbCompareMethod) As IntegerEx
+Public Function Compare(ByRef CompareString As String, Optional ByVal CompareMethod As VbCompareMethod) As Long
     
-    Set Compare = New IntegerEx
+    Dim l As Long
     
-    If p_ValueLen Then Compare.Value = StrComp(VBA.Left$(p_Value, p_ValueLen), CompareString, CompareMethod)
+    l = Len(CompareString)
+    
+    If p_ValueLen > l Then
+        
+        Compare = 1&
+    
+    ElseIf p_ValueLen < l Then
+        
+        Compare = L_NG
+    
+    ElseIf p_ValueLen > 0& And l > 0& Then
+        
+        If PUB_UNICODE Then Compare = CompareStringW(0&, (CompareMethod > 0&) * L_NG, p_ValuePtr, p_ValueLen, StrPtr(CompareString), p_ValueLen) - 2& Else Compare = CompareStringA(0&, (CompareMethod > 0&) * L_NG, p_Value, p_ValueLen, CompareString, p_ValueLen) - 2&
+    
+    End If
 
 End Function
 
@@ -362,11 +378,9 @@ Public Function Encrypt() As StringEx
 
 End Function
 
-Public Function Find(ByRef SearchString As String, Optional ByVal Start As Long, Optional ByVal Reverse As Boolean, Optional ByVal CompareMethod As VbCompareMethod) As LongEx
+Public Function Find(ByRef SearchString As String, Optional ByVal Start As Long, Optional ByVal Reverse As Boolean, Optional ByVal CompareMethod As VbCompareMethod) As Long
     
     Dim x As Long
-    
-    Set Find = New LongEx
     
     If p_ValueLen > 0& And Len(SearchString) > 0& Then
         
@@ -374,7 +388,7 @@ Public Function Find(ByRef SearchString As String, Optional ByVal Start As Long,
             
             If Start > 0& And Start < p_ValueLen Then x = Start Else x = p_ValueLen
             
-            Find.Value = InStrRev(p_Value, SearchString, x, CompareMethod)
+            Find = InStrRev(p_Value, SearchString, x, CompareMethod)
         
         Else
             
@@ -382,7 +396,7 @@ Public Function Find(ByRef SearchString As String, Optional ByVal Start As Long,
             
             x = InStr(x, p_Value, SearchString, CompareMethod)
             
-            If x <= p_ValueLen Then Find.Value = x
+            If x <= p_ValueLen Then Find = x
         
         End If
     
